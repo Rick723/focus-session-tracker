@@ -1,5 +1,4 @@
-# 全力集中！ポモちゃん・ドロちゃん育成タイマー
-
+# (開発中)短期集中！ポモちゃん・ドロちゃん育成タイマー
 ポモちゃんとドロちゃんを育てながら集中できる、5分間フォーカスタイマーアプリです。  
 Ruby on Railsで開発しています。
 
@@ -48,15 +47,3 @@ Ruby on Railsで開発しています。
 - JavaScript
 - PostgreSQL
 - HTML / CSS
-
----
-
-## 🚀 ローカル環境での起動方法
-
-```bash
-git clone https://github.com/your-username/your-repository-name.git
-cd your-repository-name
-bundle install
-rails db:create
-rails db:migrate
-rails s
