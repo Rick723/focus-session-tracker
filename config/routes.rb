@@ -2,9 +2,9 @@ Rails.application.routes.draw do
   #初期ページのルーティング
   root "pages#top"
   #タイマー機能ページのルーティング
-  get "timer" :to "pages#timer"
+  get "timer", to: "pages#timer"
   #カレンダー機能のページのルーティング
-  get "calendar" :to "pages#calendar"
+  get "calendar", to: "pages#calendar"
 
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
