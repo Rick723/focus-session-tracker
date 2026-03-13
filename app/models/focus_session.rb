@@ -1,0 +1,2 @@
+class FocusSession < ApplicationRecord
+end

@@ -44,6 +44,10 @@ Ruby on Railsで開発しています。
 
 ---
 
+### ER図
+https://dbdiagram.io/d/69a42c26a3f0aa31e16ebe1f
+
+
 ## 🛠 使用技術
 
 - Ruby
