@@ -8,9 +8,9 @@ class CreateFocusSessions < ActiveRecord::Migration[7.1]
       #成果判定に関するカラム
       t.datetime :completed_at
 
-      t.index :started_at
-      t.index :completed_at
       t.timestamps
     end
+    add_index :focus_sessions, :started_at
+    add_index :focus_sessions, :completed_at
   end
 end
