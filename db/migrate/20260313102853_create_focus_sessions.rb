@@ -1,15 +1,15 @@
 class CreateFocusSessions < ActiveRecord::Migration[7.1]
   def change
     create_table :focus_sessions do |t|
-      t.references :user, null:false, foreign_key: true, index: true
+      t.references :user, null: false, foreign_key: true
       #セッションに関するカラム
-      t.datetime :started_at, null: false, index: true
-      #t.datetime :ended_at, null: false # 実測時間をもとに状態判定できそうなので初期作成時には保留
-      t.integer :duration_seconds, null:false
+      t.datetime :started_at, null: false
+      t.integer :duration_seconds, null: false
       #成果判定に関するカラム
-      # t.datetime :reached_5min_at, null:false, index: true # started_atで状態判定できそうなので保留
-      t.datetime :completed_at, index: true
+      t.datetime :completed_at
 
+      t.index :started_at
+      t.index :completed_at
       t.timestamps
     end
   end
