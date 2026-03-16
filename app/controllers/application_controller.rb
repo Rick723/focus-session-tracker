@@ -12,6 +12,14 @@ class ApplicationController < ActionController::Base
       if token.present?
         #ユーザー情報の取得
         user = User.find_by(anonymous_token: token)
+
+        # userを取得した際に有効期限を付与（毎回更新）
+        if user
+          cookies.encrypted[:anonymous_token] = {
+            value: token,
+            expires: 3.months
+          }
+        end
       end
 
       #ユーザーが存在していない場合新しいトークンを作成
