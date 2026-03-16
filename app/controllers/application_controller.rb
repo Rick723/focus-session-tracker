@@ -5,7 +5,10 @@ class ApplicationController < ActionController::Base
   #初回アクセス時にトークン作成メソッド（Cookie)
     def ensure_anonymous_user
       #Cookieの暗号化
-      token = cookies.encrypted[:anonymous_token]
+      token = cookies.encrypted[:anonymous_token]  = {
+                value: token,
+                expires: 3.months
+              }
       user = nil
 
       #トークンに合致したユーザーが存在しているかの判定
