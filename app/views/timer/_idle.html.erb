@@ -1,0 +1,24 @@
+<!--画面上部の構成-->
+<div class="flex items-center w-full px-8 h-16 border-b-2 border-dashed border-gray-300 shrink-0">
+  <div 
+    id="changes-page-links"
+    class="flex space-x-8">
+    <!--ひな形を置いておく、のちにJSでDOM操作-->
+    <span class="text-blue-600 underline cursor-pointer font-medium hover:text-blue-800 text-lg">
+      トップに戻る
+    </span>
+    <span className="text-blue-600 underline cursor-pointer font-medium hover:text-blue-800 text-lg">
+      カレンダーを見る
+    </span>
+  </div>
+</div>
+<!--画面中央～下部-->
+<div class="flex-1 flex flex-col items-center justify-center space-y-10 pb-8">
+  <div id= "creatures-icon" class="text-[120px] leading-none">🥚</div> <!--アイコンを考える-->
+  <div id= "timer-counts"class="text-8xl font-mono text-gray-800 tracking-widest">25:00</div>
+  
+  <!--操作ボタン-->
+  <button id="timer-button"class="border-4 border-gray-800 bg-gray-100 px-20 py-4 text-2xl font-bold rounded-lg hover:bg-gray-200 transition-colors">
+    Start
+  </button>
+</div>
