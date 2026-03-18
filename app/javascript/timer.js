@@ -51,7 +51,7 @@ function startTimer() {
   }, 1000);
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("turbo:load", () => {
   const startButton = document.getElementById("start-button");
   const stopButton = document.getElementById("stop-button");
 
