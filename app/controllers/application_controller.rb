@@ -13,6 +13,7 @@ class ApplicationController < ActionController::Base
       user = User.find_by(anonymous_token: token)
 
       # ユーザーが見つかったときだけ、有効期限を更新して再保存
+      # TODO トークン自体の更新でセキュリティ性の向上を担保する
       if user
         cookies.encrypted[:anonymous_token] = {
           value: token,
