@@ -6,6 +6,8 @@ Rails.application.routes.draw do
   #カレンダー機能のページのルーティング
   get "calendar", to: "pages#calendar"
 
+  resources :focus_sessions,  only: %i[create update]
+
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
