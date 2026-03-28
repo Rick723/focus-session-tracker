@@ -2,7 +2,6 @@ let remaining = 1500;
 let intervalId = null;
 let startedAt = null;
 let focusSessionId = null;
-let action = null;
 
 function httpError(response, action) {
   alert("通信に失敗しました。もう一度お試しください。");
@@ -94,15 +93,16 @@ async function tick() {
             }
           })
         });
-        action = "POST";
+
         if (!response.ok) {
-          httpError(response, action);
+          httpError(response, "POST");
           return;
         }
 
         const data = await response.json();
         focusSessionId = data.id;
 
+        // POST成功後にのみ永続化する
         localStorage.setItem("focusSessionId", String(focusSessionId));
         localStorage.setItem("postedStartedAt", currentStartedAt);
 
@@ -151,9 +151,8 @@ async function tick() {
         })
       });
 
-      action = "PATCH";
       if (!response.ok) {
-        httpError(response, action);
+        httpError(response, "PATCH");
         return;
       }
 
@@ -214,9 +213,9 @@ async function handleStop() {
         }
       })
     });
-    action = "PATCH";
+
     if (!response.ok) {
-      httpError(response, action);
+      httpError(response, "STOP時PATCH");
       return;
     }
 
