@@ -1,10 +1,15 @@
 <!-- app/views/pages/timer.html.erb -->
+ <!-- TODO(ISSUE7-UI):
+  Start/Stop ボタンを両方DOMに置く。
+  初期状態は Start 表示 / Stop 非表示。
+  切替は JS 側で行う。
+-->
 
 <div id="timer-page" class="min-h-screen flex flex-col bg-stone-50">
   <!-- 画面上部 -->
   <header class="flex items-center w-full px-8 h-16 border-b-2 border-dashed border-gray-300 shrink-0">
     <% if false %>
-      <!-- running時はリンクを消す想定。今は仮条件 -->
+      <!-- TODO(ISSUE8以降): running中はリンク非表示にする。今は仮条件 -->
     <% else %>
       <nav id="page-links" class="flex space-x-8">
         <%= link_to "トップに戻る", root_path,
@@ -36,8 +41,13 @@
     </div>
 
     <!-- 操作ボタン -->
+    <!-- TODO(ISSUE7):
+      - if false をやめて、Start / Stop ボタンを両方DOMに置く
+      - 2つのボタンは同じ位置に表示し、見た目は1つだけ切り替わる形にする
+      - 初期状態では Start を表示、Stop は hidden にする
+      - 表示切替は JS 側で行う
+    -->
     <div id="timer-actions">
-      <% if false %>
         <button
           id="stop-button"
           type="button"
@@ -45,7 +55,6 @@
         >
           Stop
         </button>
-      <% else %>
         <button
           id="start-button"
           type="button"
@@ -53,15 +62,16 @@
         >
           Start
         </button>
-      <% end %>
     </div>
+
     <!--進化演出の表示領域-->
     <div id="result-icon">
-        <!--25分達成時に進化演出-->
+      <!-- TODO(ISSUE8以降): 25分達成時に進化演出 -->
     </div>
+
     <!-- 将来の状態メッセージ -->
     <div id="timer-status-message" class="min-h-[2rem] text-base text-gray-600">
-      <!-- 例: 集中を開始します / / 25分完了 -->
+      <!-- 例: 集中を開始します / 25分完了 -->
     </div>
   </main>
 </div>
