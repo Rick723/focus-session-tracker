@@ -25,7 +25,6 @@ function toggleTimerButtons(isRunning) {
   const startButton = document.getElementById("start-button");
   const stopButton = document.getElementById("stop-button");
 
-  // 前提として start / stop ボタンがないと処理しない
   if (!startButton || !stopButton) return;
 
   if (isRunning) {
@@ -102,7 +101,6 @@ async function tick() {
         const data = await response.json();
         focusSessionId = data.id;
 
-        // POST成功後にのみ永続化する
         localStorage.setItem("focusSessionId", String(focusSessionId));
         localStorage.setItem("postedStartedAt", currentStartedAt);
 
@@ -156,16 +154,12 @@ async function tick() {
         return;
       }
 
-      // TODO(ISSUE8以降):
-      // 25分完了時は ⚫ ではなく 🟡 表示へ切り替える
-      // completed_at がある状態を優先表示にする
-
       console.log("25分完了");
       console.log("focusSessionId:", focusSessionId);
       console.log("PATCH status:", response.status);
 
-      // TODO(ISSUE8以降):
-      // 完了後にUIをどのタイミングで初期化するか決める
+      // 25分完了後は初期状態へ戻す
+      resetTimer();
     } catch (error) {
       alert("通信に失敗しました。もう一度お試しください。");
       console.error("PATCH通信エラー", error);
@@ -216,6 +210,10 @@ async function handleStop() {
 
     if (!response.ok) {
       httpError(response, "STOP時PATCH");
+
+      // 失敗時は localStorage を消さず、UIだけ初期表示に戻す
+      toggleTimerButtons(false);
+      renderTimer();
       return;
     }
 
@@ -223,6 +221,10 @@ async function handleStop() {
   } catch (error) {
     alert("通信に失敗しました。もう一度お試しください。");
     console.error("STOP時PATCH通信エラー", error);
+
+    // 通信失敗時も localStorage は保持し、UIだけ戻す
+    toggleTimerButtons(false);
+    renderTimer();
     return;
   }
 }
@@ -243,8 +245,6 @@ document.addEventListener("turbo:load", () => {
 
   if (stopButton) {
     stopButton.addEventListener("click", () => {
-      // TODO(ISSUE7-stop):
-      // Stopボタン押下時の確認メッセージ
       const confirmed = window.confirm("タイマーを停止してセッションを終了しますか？");
       if (!confirmed) return;
 
