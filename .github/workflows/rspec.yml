@@ -10,41 +10,22 @@ jobs:
   rspec:
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: password
-          MYSQL_DATABASE: pomodoro_timer_test
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -ppassword"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=10
-
-    env:
-      RAILS_ENV: test
-      DATABASE_HOST: 127.0.0.1
-      DATABASE_USERNAME: root
-      DATABASE_PASSWORD: password
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: .ruby-version
-          bundler-cache: true
+      - name: Build test container
+        run: docker compose build web
 
-      - name: Install MySQL client libraries
-        run: sudo apt-get update && sudo apt-get install -y default-libmysqlclient-dev pkg-config
+      - name: Start database
+        run: docker compose up -d db
 
       - name: Prepare database
-        run: bin/rails db:prepare
+        run: docker compose run --rm -e RAILS_ENV=test web bin/rails db:prepare
 
       - name: Run RSpec
-        run: bundle exec rspec
+        run: docker compose run --rm -e RAILS_ENV=test web bundle exec rspec
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down -v
