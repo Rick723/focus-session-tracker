@@ -3,6 +3,14 @@ class FocusSessionsController < ApplicationController
 
   def create
     # 5分到達時に初めてFocusSessionを生成
+    # 既存レコードを確認、あれば再利用対象としてJSONレスポンスとしてidと200ステータスコードを返す
+    existing_focus_session = current_user.focus_sessions.find_by(started_at: create_params[:started_at])
+
+    if existing_focus_session
+      render json: { id: existing_focus_session.id, reused: true }, status: :ok
+      return
+    end
+
     @focus_session = current_user.focus_sessions.build(create_params)
 
     if @focus_session.save
