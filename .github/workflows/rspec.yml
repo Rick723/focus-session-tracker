@@ -20,6 +20,16 @@ jobs:
       - name: Start database
         run: docker compose up -d db
 
+      - name: Wait for database
+        run: |
+          for i in {1..30}; do
+            if docker compose exec -T db mysqladmin ping -h 127.0.0.1 -ppassword; then
+              exit 0
+            fi
+            sleep 2
+          done
+          exit 1
+
       - name: Prepare database
         run: docker compose run --rm -e RAILS_ENV=test web bin/rails db:prepare
 
