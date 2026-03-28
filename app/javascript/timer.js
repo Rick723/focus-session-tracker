@@ -367,7 +367,15 @@ async function initializeTimer() {
     const durationSeconds = 1500 - remaining;
 
     if (durationSeconds >= 300) {
-      await createFocusSession(startedAt, durationSeconds);
+      const created = await createFocusSession(startedAt, durationSeconds);
+
+      // 復元後の create 失敗時は running に進めず、その場で停止する
+      // TODO(ISSUE9): create失敗時の着地（reset / 再試行UI / Start無効化）は要整理
+      if (!created) {
+        toggleTimerButtons(false);
+        setTimerButtonsDisabled(false);
+        return;
+      }
     }
 
     toggleTimerButtons(true);
