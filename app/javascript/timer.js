@@ -137,7 +137,7 @@ function restoreTimerState() {
 }
 
 async function createFocusSession(currentStartedAt, durationSeconds) {
-  if (!currentStartedAt) return false;
+  if (!currentStartedAt) return { state: "failed" };
 
   const postedStartedAt = localStorage.getItem("postedStartedAt");
   const currentFocusSessionId = focusSessionId || localStorage.getItem("focusSessionId");
@@ -145,11 +145,11 @@ async function createFocusSession(currentStartedAt, durationSeconds) {
   if (currentFocusSessionId) {
     focusSessionId = currentFocusSessionId;
     renderCreature("⚫");
-    return true;
+    return { state: "skipped" };
   }
 
-  if (postedStartedAt === currentStartedAt) {
-    return false;
+  if (postedStartedAt === currentStartedAt && !isInitializing) {
+    return { state: "skipped" };
   }
 
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
@@ -176,8 +176,8 @@ async function createFocusSession(currentStartedAt, durationSeconds) {
 
     if (!response.ok) {
       localStorage.removeItem("postedStartedAt");
-      httpError(response, "セッション作成");
-      return false;
+      console.error("セッション作成 HTTP失敗", response.status);
+      return { state: "failed" };
     }
 
     const data = await response.json();
@@ -192,12 +192,11 @@ async function createFocusSession(currentStartedAt, durationSeconds) {
     console.log("durationSeconds", durationSeconds);
     console.log("focusSessionId:", focusSessionId);
 
-    return true;
+    return { state: "created" };
   } catch (error) {
     localStorage.removeItem("postedStartedAt");
-    setStatusMessage("セッション作成に失敗しました。もう一度お試しください。");
     console.error("POST通信エラー", error);
-    return false;
+    return { state: "failed" };
   }
 }
 
@@ -275,7 +274,7 @@ async function finalizeExpiredTimer() {
   // MVPでは25分超過時も25分固定で扱う
   if (!currentFocusSessionId) {
     const created = await createFocusSession(currentStartedAt, 1500);
-    if (!created) {
+    if (created.state === "failed") {
       lockTimerForReload("保存に失敗しました。再読み込みして復旧をお試しください。");
       return;
     }
@@ -292,7 +291,11 @@ async function tick() {
 
   if (remaining === 1200) {
     const currentStartedAt = startedAt || localStorage.getItem("startedAt");
-    await createFocusSession(currentStartedAt, durationSeconds);
+    const created = await createFocusSession(currentStartedAt, durationSeconds);
+    if (created.state === "failed") {
+      lockTimerForReload("保存に失敗しました。再読み込みして復旧をお試しください。");
+      return;
+    }
   }
 
   if (remaining <= 0) {
@@ -380,7 +383,7 @@ async function initializeTimer() {
     if (durationSeconds >= 300) {
       const created = await createFocusSession(startedAt, durationSeconds);
 
-      if (!created) {
+      if (created.state === "failed") {
         lockTimerForReload("保存に失敗しました。再読み込みして復旧をお試しください。");
         return;
       }
