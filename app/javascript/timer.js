@@ -222,7 +222,7 @@ async function handleStop() {
     resetTimer();
   } catch (error) {
     alert("通信に失敗しました。もう一度お試しください。");
-    console.error("PATCH通信エラー", error);
+    console.error("STOP時PATCH通信エラー", error);
     return;
   }
 }
