@@ -1,19 +1,18 @@
 <!-- app/views/pages/timer.html.erb -->
+<!-- TODO(ISSUE8以降):
+  running中はリンク非表示にする
+-->
 
 <div id="timer-page" class="min-h-screen flex flex-col bg-stone-50">
   <!-- 画面上部 -->
   <header class="flex items-center w-full px-8 h-16 border-b-2 border-dashed border-gray-300 shrink-0">
-    <% if false %>
-      <!-- running時はリンクを消す想定。今は仮条件 -->
-    <% else %>
-      <nav id="page-links" class="flex space-x-8">
-        <%= link_to "トップに戻る", root_path,
-          class: "text-blue-600 underline font-medium hover:text-blue-800 text-lg" %>
+    <nav id="page-links" class="flex space-x-8">
+      <%= link_to "トップに戻る", root_path,
+        class: "text-blue-600 underline font-medium hover:text-blue-800 text-lg" %>
 
-        <%= link_to "カレンダーを見る", calendar_path,
-          class: "text-blue-600 underline font-medium hover:text-blue-800 text-lg" %>
-      </nav>
-    <% end %>
+      <%= link_to "カレンダーを見る", calendar_path,
+        class: "text-blue-600 underline font-medium hover:text-blue-800 text-lg" %>
+    </nav>
   </header>
 
   <!-- 画面中央 -->
@@ -36,32 +35,33 @@
     </div>
 
     <!-- 操作ボタン -->
-    <div id="timer-actions">
-      <% if false %>
-        <button
-          id="stop-button"
-          type="button"
-          class="border-4 border-gray-800 bg-gray-100 px-20 py-4 text-2xl font-bold rounded-lg hover:bg-gray-200 transition-colors"
-        >
-          Stop
-        </button>
-      <% else %>
-        <button
-          id="start-button"
-          type="button"
-          class="border-4 border-gray-800 bg-gray-100 px-20 py-4 text-2xl font-bold rounded-lg hover:bg-gray-200 transition-colors"
-        >
-          Start
-        </button>
-      <% end %>
+    <div id="timer-actions" class="flex items-center justify-center">
+      <button
+        id="stop-button"
+        type="button"
+        hidden
+        class="border-4 border-gray-800 bg-gray-100 px-20 py-4 text-2xl font-bold rounded-lg hover:bg-gray-200 transition-colors"
+      >
+        Stop
+      </button>
+
+      <button
+        id="start-button"
+        type="button"
+        class="border-4 border-gray-800 bg-gray-100 px-20 py-4 text-2xl font-bold rounded-lg hover:bg-gray-200 transition-colors"
+      >
+        Start
+      </button>
     </div>
-    <!--進化演出の表示領域-->
+
+    <!-- 進化演出の表示領域 -->
     <div id="result-icon">
-        <!--25分達成時に進化演出-->
+      <!-- TODO(ISSUE8以降): 25分達成時に進化演出 -->
     </div>
+
     <!-- 将来の状態メッセージ -->
     <div id="timer-status-message" class="min-h-[2rem] text-base text-gray-600">
-      <!-- 例: 集中を開始します / / 25分完了 -->
+      <!-- TODO(ISSUE8以降): 状態メッセージ表示 -->
     </div>
   </main>
 </div>
