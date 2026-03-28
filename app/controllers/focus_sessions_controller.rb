@@ -1,4 +1,5 @@
 class FocusSessionsController < ApplicationController
+  rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
 
   def create
     # 5分到達時に初めてFocusSessionを生成
@@ -15,6 +16,11 @@ class FocusSessionsController < ApplicationController
     # 25分完了時に現在ユーザーの対象セッションを取得して更新
     @focus_session = current_user.focus_sessions.find(params[:id])
 
+    if @focus_session.completed_at.present?
+      render json: { error: "already_completed" }, status: :conflict
+      return
+    end
+
     if @focus_session.update(update_params)
       render json: { id: @focus_session.id }, status: :ok
     else
@@ -30,5 +36,9 @@ class FocusSessionsController < ApplicationController
 
   def update_params
     params.require(:focus_session).permit(:duration_seconds, :completed_at)
+  end
+
+  def render_not_found
+    render json: { error: "not_found" }, status: :not_found
   end
 end
