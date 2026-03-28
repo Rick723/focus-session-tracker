@@ -4,6 +4,7 @@ let startedAt = null;
 let focusSessionId = null;
 let isInitializing = false;
 let reloadRequired = false;
+let pendingUiLocked = false;
 
 function setStatusMessage(message) {
   const statusMessage = document.getElementById("timer-status-message");
@@ -17,11 +18,6 @@ function clearStatusMessage() {
   if (!statusMessage) return;
 
   statusMessage.textContent = "";
-}
-
-function httpError(response, action) {
-  setStatusMessage(`${action}に失敗しました。もう一度お試しください。`);
-  console.error(`${action} HTTP失敗`, response.status);
 }
 
 function formatTime(seconds) {
@@ -78,6 +74,7 @@ function lockTimerForReload(message) {
 
 function resetTimer() {
   reloadRequired = false;
+  pendingUiLocked = false;
   remaining = 1500;
   intervalId = null;
   startedAt = null;
@@ -136,8 +133,8 @@ function restoreTimerState() {
   return true;
 }
 
-async function createFocusSession(currentStartedAt, durationSeconds) {
-  if (!currentStartedAt) return { state: "failed" };
+async function createFocusSession(currentStartedAt, durationSeconds, allowPending = !isInitializing) {
+  if (!currentStartedAt) return { status: "failure" };
 
   const postedStartedAt = localStorage.getItem("postedStartedAt");
   const currentFocusSessionId = focusSessionId || localStorage.getItem("focusSessionId");
@@ -145,11 +142,11 @@ async function createFocusSession(currentStartedAt, durationSeconds) {
   if (currentFocusSessionId) {
     focusSessionId = currentFocusSessionId;
     renderCreature("⚫");
-    return { state: "skipped" };
+    return { status: "success" };
   }
 
-  if (postedStartedAt === currentStartedAt && !isInitializing) {
-    return { state: "skipped" };
+  if (postedStartedAt === currentStartedAt && allowPending) {
+    return { status: "pending" };
   }
 
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
@@ -177,7 +174,7 @@ async function createFocusSession(currentStartedAt, durationSeconds) {
     if (!response.ok) {
       localStorage.removeItem("postedStartedAt");
       console.error("セッション作成 HTTP失敗", response.status);
-      return { state: "failed" };
+      return { status: "failure" };
     }
 
     const data = await response.json();
@@ -192,11 +189,11 @@ async function createFocusSession(currentStartedAt, durationSeconds) {
     console.log("durationSeconds", durationSeconds);
     console.log("focusSessionId:", focusSessionId);
 
-    return { state: "created" };
+    return { status: "success" };
   } catch (error) {
     localStorage.removeItem("postedStartedAt");
     console.error("POST通信エラー", error);
-    return { state: "failed" };
+    return { status: "failure" };
   }
 }
 
@@ -273,9 +270,17 @@ async function finalizeExpiredTimer() {
 
   // MVPでは25分超過時も25分固定で扱う
   if (!currentFocusSessionId) {
-    const created = await createFocusSession(currentStartedAt, 1500);
-    if (created.state === "failed") {
+    const created = await createFocusSession(currentStartedAt, 1500, true);
+    if (created.status === "failure") {
       lockTimerForReload("保存に失敗しました。再読み込みして復旧をお試しください。");
+      return;
+    }
+
+    if (created.status === "pending") {
+      pendingUiLocked = true;
+      toggleTimerButtons(true);
+      setTimerButtonsDisabled(true);
+      setStatusMessage("保存処理を確認中です。少し待ってから再読み込みしてください。");
       return;
     }
   }
@@ -292,7 +297,7 @@ async function tick() {
   if (remaining === 1200) {
     const currentStartedAt = startedAt || localStorage.getItem("startedAt");
     const created = await createFocusSession(currentStartedAt, durationSeconds);
-    if (created.state === "failed") {
+    if (created.status === "failure") {
       lockTimerForReload("保存に失敗しました。再読み込みして復旧をお試しください。");
       return;
     }
@@ -308,6 +313,7 @@ function startTimer() {
   if (intervalId !== null) return;
 
   reloadRequired = false;
+  pendingUiLocked = false;
   remaining = 1500;
   startedAt = new Date().toISOString();
   focusSessionId = null;
@@ -383,7 +389,7 @@ async function initializeTimer() {
     if (durationSeconds >= 300) {
       const created = await createFocusSession(startedAt, durationSeconds);
 
-      if (created.state === "failed") {
+      if (created.status === "failure") {
         lockTimerForReload("保存に失敗しました。再読み込みして復旧をお試しください。");
         return;
       }
@@ -398,7 +404,7 @@ async function initializeTimer() {
     }
   } finally {
     isInitializing = false;
-    setTimerButtonsDisabled(reloadRequired);
+    setTimerButtonsDisabled(reloadRequired || pendingUiLocked);
   }
 }
 

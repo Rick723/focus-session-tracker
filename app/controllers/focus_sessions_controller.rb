@@ -3,20 +3,29 @@ class FocusSessionsController < ApplicationController
 
   def create
     # 5分到達時に初めてFocusSessionを生成
+    focus_session_params = create_params
     # 既存レコードを確認、あれば再利用対象としてJSONレスポンスとしてidと200ステータスコードを返す
-    existing_focus_session = current_user.focus_sessions.find_by(started_at: create_params[:started_at])
+    existing_focus_session = current_user.focus_sessions.find_by(started_at: focus_session_params[:started_at])
 
     if existing_focus_session
       render json: { id: existing_focus_session.id, reused: true }, status: :ok
       return
     end
 
-    @focus_session = current_user.focus_sessions.build(create_params)
+    @focus_session = current_user.focus_sessions.build(focus_session_params)
 
     if @focus_session.save
       render json: { id: @focus_session.id }, status: :created
     else
       render json: { errors: @focus_session.errors.full_messages }, status: :unprocessable_entity
+    end
+  rescue ActiveRecord::RecordNotUnique
+    existing_focus_session = current_user.focus_sessions.find_by(started_at: focus_session_params[:started_at])
+
+    if existing_focus_session
+      render json: { id: existing_focus_session.id, reused: true }, status: :ok
+    else
+      render json: { error: "focus_session_conflict" }, status: :conflict
     end
   end
 

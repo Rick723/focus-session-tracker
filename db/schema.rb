@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_13_102853) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_28_140000) do
   create_table "focus_sessions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.datetime "started_at", null: false
@@ -20,6 +20,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_13_102853) do
     t.datetime "updated_at", null: false
     t.index ["completed_at"], name: "index_focus_sessions_on_completed_at"
     t.index ["started_at"], name: "index_focus_sessions_on_started_at"
+    t.index ["user_id", "started_at"], name: "index_focus_sessions_on_user_id_and_started_at", unique: true
     t.index ["user_id"], name: "index_focus_sessions_on_user_id"
   end
 
