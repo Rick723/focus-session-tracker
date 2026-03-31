@@ -72,6 +72,16 @@ function lockTimerForReload(message) {
   setStatusMessage(message);
 }
 
+function resetTimerFor409(route, currentFocusSessionId, status, message) {
+  console.warn("PATCH conflict handled", {
+    route,
+    status,
+    focusSessionId: currentFocusSessionId
+  });
+  resetTimer();
+  setStatusMessage(message);
+}
+
 function resetTimer() {
   reloadRequired = false;
   pendingUiLocked = false;
@@ -224,7 +234,9 @@ async function patchFocusSession(durationSeconds, completedAt = null) {
     });
 
     if (!response.ok) {
-      console.error("PATCH HTTP失敗", response.status);
+      if (response.status !== 409) {
+        console.error("PATCH HTTP失敗", response.status);
+      }
       return { ok: false, status: response.status };
     }
 
@@ -248,7 +260,12 @@ async function completeTimer() {
   const patched = await patchFocusSession(1500, new Date().toISOString());
   if (!patched.ok) {
     if (patched.status === 409) {
-      lockTimerForReload("保存済みです。画面を再読み込みしてください。");
+      resetTimerFor409(
+        "completeTimer",
+        currentFocusSessionId,
+        patched.status,
+        "すでに保存済みのため初期状態に戻しました。"
+      );
       return;
     }
 
@@ -350,7 +367,12 @@ async function handleStop() {
   const patched = await patchFocusSession(durationSeconds, null);
   if (!patched.ok) {
     if (patched.status === 409) {
-      lockTimerForReload("保存済みです。画面を再読み込みしてください。");
+      resetTimerFor409(
+        "handleStop",
+        currentFocusSessionId,
+        patched.status,
+        "すでに保存済みのため初期状態に戻しました。"
+      );
       return;
     }
 

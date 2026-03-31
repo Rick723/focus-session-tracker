@@ -69,3 +69,58 @@ https://dbdiagram.io/d/69a42c26a3f0aa31e16ebe1f
 - JavaScript
 - mySQl
 - HTML / CSS
+
+## Docker 開発手順
+
+このプロジェクトでは、Rails と RSpec を Docker 内で実行する前提に統一します。
+ホスト側では `DATABASE_HOST=db` を名前解決できないため、`bundle exec rspec` を直接ホストで実行しません。
+
+### 初回セットアップ
+
+```bash
+bin/docker-setup
+```
+
+このスクリプトは以下をまとめて行います。
+
+- `docker compose up -d`
+- development DB の `db:prepare`
+- test DB の `db:prepare`
+
+### アプリ起動
+
+```bash
+docker compose up -d
+```
+
+### RSpec 実行
+
+標準手順:
+
+```bash
+bin/rspec
+```
+
+特定ファイルだけ実行する場合:
+
+```bash
+bin/rspec spec/requests/focus_sessions_spec.rb
+```
+
+直接 Docker コマンドを使う場合:
+
+```bash
+docker compose exec -e RAILS_ENV=test web bundle exec rspec
+```
+
+### test DB の再準備
+
+```bash
+docker compose exec -e RAILS_ENV=test web bin/rails db:prepare
+```
+
+### 運用ルール
+
+- RSpec はホストではなく Docker 内で実行する
+- `docker compose run` ではなく、基本は `docker compose exec web ...` を使う
+- 先に `docker compose up -d` で常駐コンテナを起動してから操作する
