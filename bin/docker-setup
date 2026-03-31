@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+docker compose up -d
+docker compose exec web bin/rails db:prepare
+docker compose exec -e RAILS_ENV=test web bin/rails db:prepare
