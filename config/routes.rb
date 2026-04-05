@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   get "timer", to: "pages#timer"
   #カレンダー機能のページのルーティング
   get "calendar", to: "pages#calendar"
+  get "calendar/day_details", to: "pages#calendar_day_details"
 
   resources :focus_sessions,  only: %i[create update]
 

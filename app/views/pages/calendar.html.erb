@@ -21,7 +21,13 @@
       attribute: :started_at do |date, _focus_sessions| %>
       <% summary = @daily_summaries.fetch(date, CalendarMonthPresenter.empty_summary) %>
 
-      <div class="calendar-day-card">
+      <div
+        class="calendar-day-card"
+        data-calendar-day
+        data-date="<%= date.iso8601 %>"
+        role="button"
+        tabindex="0"
+      >
         <div class="calendar-day-head">
           <time datetime="<%= date %>" class="calendar-day-number"><%= date.day %></time>
           <% if summary[:session_count].positive? %>
@@ -47,4 +53,18 @@
       </div>
     <% end %>
   </section>
+
+  <div class="calendar-modal" data-calendar-modal hidden>
+    <div class="calendar-modal-backdrop" data-calendar-close></div>
+    <div class="calendar-modal-panel" role="dialog" aria-modal="true" aria-labelledby="calendar-modal-title">
+      <div class="calendar-modal-header">
+        <h2 id="calendar-modal-title" class="calendar-modal-title">日付詳細</h2>
+        <button type="button" class="calendar-modal-close" data-calendar-close>閉じる</button>
+      </div>
+
+      <p class="calendar-modal-date" data-calendar-modal-date></p>
+      <p class="calendar-modal-empty" data-calendar-modal-empty hidden>この日の記録はありません</p>
+      <div class="calendar-modal-list" data-calendar-modal-list></div>
+    </div>
+  </div>
 </div>
