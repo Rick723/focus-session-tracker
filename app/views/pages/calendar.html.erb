@@ -1,1 +1,50 @@
-<h1>カレンダー画面</h1>
+<div class="calendar-page">
+  <header class="calendar-header">
+    <div>
+      <p class="calendar-eyebrow">Monthly Review</p>
+      <h1 class="calendar-title"><%= @display_month.strftime("%Y年%-m月") %> の成果</h1>
+      <p class="calendar-description">
+        1セッション = 1 pomo-doro として、日ごとの成果を振り返れます。
+      </p>
+    </div>
+
+    <nav class="calendar-actions" aria-label="ページ移動">
+      <%= link_to "トップ", root_path, class: "calendar-link-button calendar-link-button-secondary" %>
+      <%= link_to "タイマー", timer_path, class: "calendar-link-button calendar-link-button-secondary" %>
+    </nav>
+  </header>
+
+  <section class="calendar-month-shell">
+    <%= month_calendar start_date: @display_month,
+      start_date_param: :month,
+      events: @month_focus_sessions,
+      attribute: :started_at do |date, _focus_sessions| %>
+      <% summary = @daily_summaries.fetch(date, CalendarMonthPresenter.empty_summary) %>
+
+      <div class="calendar-day-card">
+        <div class="calendar-day-head">
+          <time datetime="<%= date %>" class="calendar-day-number"><%= date.day %></time>
+          <% if summary[:session_count].positive? %>
+            <span class="calendar-session-count"><%= "#{summary[:session_count]}件" %></span>
+          <% end %>
+        </div>
+
+        <% if summary[:session_count].positive? %>
+          <div class="calendar-day-body">
+            <p class="calendar-duration"><%= focus_duration_label(summary[:total_focus_seconds]) %></p>
+
+            <div class="calendar-badges">
+              <% summary[:pomo_doro_items].each do |item| %>
+                <span class="<%= pomo_doro_badge_class(item[:kind]) %>">
+                  <%= "#{item[:label]} #{item[:count]}" %>
+                </span>
+              <% end %>
+            </div>
+          </div>
+        <% elsif date.month == @display_month.month %>
+          <p class="calendar-empty-text">この日の記録はまだありません</p>
+        <% end %>
+      </div>
+    <% end %>
+  </section>
+</div>
