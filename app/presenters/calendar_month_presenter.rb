@@ -14,12 +14,19 @@ class CalendarMonthPresenter
     @focus_sessions = focus_sessions
   end
 
+  def self.session_kind_for(focus_session)
+    return :completed if focus_session.completed_at.present?
+    return :reached_five_minutes if focus_session.duration_seconds.to_i >= FIVE_MINUTES_IN_SECONDS
+
+    nil
+  end
+
   def daily_summaries
     @daily_summaries ||= begin
       summaries = Hash.new { |hash, key| hash[key] = self.class.empty_summary }
 
       focus_sessions.each do |focus_session|
-        session_kind = classify_session(focus_session)
+        session_kind = self.class.session_kind_for(focus_session)
         next if session_kind.nil?
 
         date = focus_session.started_at.in_time_zone.to_date
@@ -39,13 +46,6 @@ class CalendarMonthPresenter
   private
 
   attr_reader :focus_sessions
-
-  def classify_session(focus_session)
-    return :completed if focus_session.completed_at.present?
-    return :reached_five_minutes if focus_session.duration_seconds.to_i >= FIVE_MINUTES_IN_SECONDS
-
-    nil
-  end
 
   def build_pomo_doro_items(counts)
     [
