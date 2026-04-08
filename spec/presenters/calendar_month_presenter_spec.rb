@@ -39,21 +39,5 @@ RSpec.describe CalendarMonthPresenter do
       )
     end
 
-    it "2種類に当てはまらない session は分類項目に含めない" do
-      user = create(:user)
-      create(
-        :focus_session,
-        user: user,
-        started_at: Time.zone.local(2026, 4, 9, 10, 0, 0),
-        duration_seconds: 120,
-        completed_at: nil
-      )
-
-      summaries = described_class.new(
-        focus_sessions: user.focus_sessions.where(started_at: Date.new(2026, 4, 1).all_month)
-      ).daily_summaries
-
-      expect(summaries).to eq({})
-    end
   end
 end

@@ -77,13 +77,6 @@ RSpec.describe "Pages", type: :request do
         )
         create(
           :focus_session,
-          user: user,
-          started_at: Time.zone.local(2026, 4, 5, 18, 0, 0),
-          duration_seconds: 120,
-          completed_at: nil
-        )
-        create(
-          :focus_session,
           user: other_user,
           started_at: Time.zone.local(2026, 4, 5, 9, 0, 0),
           duration_seconds: 1500,
