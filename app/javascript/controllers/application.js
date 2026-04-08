@@ -1,4 +1,6 @@
 import { Application } from "@hotwired/stimulus"
+import "timer"
+import "calendar"
 
 const application = Application.start()
 
