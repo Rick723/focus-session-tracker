@@ -6,6 +6,32 @@ let isInitializing = false;
 let reloadRequired = false;
 let pendingUiLocked = false;
 
+function setPageLinksHidden(hidden) {
+  const pageLinks = document.getElementById("page-links");
+  if (!pageLinks) return;
+
+  pageLinks.hidden = hidden;
+}
+
+function installTimerTestHooks() {
+  if (document.body?.dataset.railsEnv !== "test") return;
+
+  window.timerTestHooks = {
+    setRemaining(value) {
+      remaining = value;
+    },
+    setFocusSessionId(value) {
+      focusSessionId = value;
+    },
+    stopTimer() {
+      stopTimer();
+    },
+    async tick() {
+      await tick();
+    }
+  };
+}
+
 function setStatusMessage(message) {
   const statusMessage = document.getElementById("timer-status-message");
   if (!statusMessage) return;
@@ -66,6 +92,7 @@ function setTimerButtonsDisabled(disabled) {
 function lockTimerForReload(message) {
   reloadRequired = true;
   stopTimer();
+  setPageLinksHidden(true);
   toggleTimerButtons(true);
   setTimerButtonsDisabled(true);
   renderTimer();
@@ -94,6 +121,7 @@ function resetTimer() {
   localStorage.removeItem("focusSessionId");
   localStorage.removeItem("postedStartedAt");
 
+  setPageLinksHidden(false);
   toggleTimerButtons(false);
   setTimerButtonsDisabled(false);
   renderCreature("🥚");
@@ -295,6 +323,7 @@ async function finalizeExpiredTimer() {
 
     if (created.status === "pending") {
       pendingUiLocked = true;
+      setPageLinksHidden(true);
       toggleTimerButtons(true);
       setTimerButtonsDisabled(true);
       setStatusMessage("保存処理を確認中です。少し待ってから再読み込みしてください。");
@@ -340,6 +369,7 @@ function startTimer() {
   localStorage.removeItem("postedStartedAt");
 
   clearStatusMessage();
+  setPageLinksHidden(true);
   toggleTimerButtons(true);
   setTimerButtonsDisabled(false);
   renderCreature("🥚");
@@ -395,6 +425,7 @@ async function initializeTimer() {
 
     if (!hasStoredTimer) {
       reloadRequired = false;
+      setPageLinksHidden(false);
       toggleTimerButtons(false);
       clearStatusMessage();
       return;
@@ -417,6 +448,7 @@ async function initializeTimer() {
       }
     }
 
+    setPageLinksHidden(true);
     toggleTimerButtons(true);
 
     if (intervalId === null) {
@@ -434,6 +466,7 @@ document.addEventListener("turbo:load", () => {
   const startButton = document.getElementById("start-button");
   const stopButton = document.getElementById("stop-button");
 
+  installTimerTestHooks();
   initializeTimer();
 
   if (startButton && !startButton.dataset.bound) {

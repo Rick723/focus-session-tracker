@@ -10,7 +10,7 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
+  <body data-rails-env="<%= Rails.env %>">
     <%= yield %>
   </body>
 </html>
