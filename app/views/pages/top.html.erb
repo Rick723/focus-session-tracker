@@ -1,12 +1,90 @@
-<div class="top-page">
-  <div class="top-card">
-    <p class="top-eyebrow">Pomodoro Timer</p>
-    <h1>TOP</h1>
-    <p>短期集中！ポモちゃんドロちゃん育成タイマー</p>
+<%# Hero artwork desktop: app/assets/images/timer_images/farm_layout/first_phase_16:9.png %>
+<%# Hero artwork mobile: app/assets/images/timer_images/farm_layout/first_phase_3:4.png %>
+<% x_message = "【やること】 まずは５分だけはじめます！ #はじめの5分集中タイマー" %>
 
-    <div class="top-links">
-      <%= link_to "タイマーを開く", timer_path, class: "top-link-button" %>
-      <%= link_to "カレンダーを見る", calendar_path, class: "top-link-button top-link-button-secondary" %>
+<div
+  class="top-page top-hero"
+  data-top-page
+  style="
+    --top-hero-desktop-image: url('<%= asset_path('timer_images/farm_layout/first_phase_16:9.png') %>');
+    --top-hero-mobile-image: url('<%= asset_path('timer_images/farm_layout/first_phase_3:4.png') %>');
+  "
+>
+  <div class="top-hero__mascots" aria-hidden="true">
+    <img
+      class="top-hero__mascot top-hero__mascot--left"
+      src="<%= asset_path('creature_images/normal_creature/doro-chan0 Image.png') %>"
+      alt=""
+    >
+    <img
+      class="top-hero__mascot top-hero__mascot--right"
+      src="<%= asset_path('creature_images/normal_creature/pomo-chan Image.png') %>"
+      alt=""
+    >
+  </div>
+
+  <section class="top-hero__content" aria-labelledby="top-title">
+    <div class="top-hero__copy">
+      <div class="top-hero__heading-group">
+        <h1 id="top-title" class="top-hero__title">
+          はじめの５分集中タイマー
+          <span class="top-hero__subtitle">〜 ポモちゃんドロちゃん育成記録 〜</span>
+        </h1>
+        <p class="top-hero__concept">
+          5分の集中を積み重ねて、ポモちゃんとドロちゃんの記録を育てていくアプリです。
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="top-info-button"
+        data-top-modal-open
+        aria-haspopup="dialog"
+        aria-controls="top-info-modal"
+      >
+        <span class="top-info-button__icon" aria-hidden="true">i</span>
+        <span class="top-info-button__text">アプリについて</span>
+      </button>
+
+      <div class="top-hero__actions">
+        <%= link_to "集中を始める", timer_path, class: "top-link-button top-link-button-primary" %>
+        <%= link_to "記録を見る", calendar_path, class: "top-link-button top-link-button-secondary" %>
+        <%= link_to "Xで宣言する",
+          "https://twitter.com/intent/tweet?text=#{ERB::Util.url_encode(x_message)}",
+          class: "top-link-button top-link-button-tertiary",
+          target: "_blank",
+          rel: "noopener noreferrer" %>
+      </div>
     </div>
+  </section>
+
+  <div id="top-info-modal" class="top-modal" data-top-modal hidden>
+    <div class="top-modal__backdrop" data-top-modal-close></div>
+    <section
+      class="top-modal__panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="top-modal-title"
+      aria-describedby="top-modal-description"
+    >
+      <div class="top-modal__header">
+        <h2 id="top-modal-title" class="top-modal__title">アプリについて</h2>
+        <button type="button" class="top-modal__close" data-top-modal-close aria-label="閉じる">
+          閉じる
+        </button>
+      </div>
+
+      <div id="top-modal-description" class="top-modal__body">
+        <p>
+          ・集中を始めるきっかけは、まず5分でじゅうぶん。気持ちが動いた最初の時間を大切にするためのタイマーです。
+        </p>
+        <p>
+          ・5分以上の集中は記録として残り、タイマー画面からすぐに集中を始められます。あとからカレンダー画面で、積み重ねた時間をゆっくり振り返れます。
+        </p>
+        <p>
+          ・Xでやることをみんなに宣言しましょう！
+        </p>
+      </div>
+    </section>
   </div>
 </div>

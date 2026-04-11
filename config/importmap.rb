@@ -3,6 +3,7 @@
 pin "application"
 pin "timer", to: "timer.js"
 pin "calendar", to: "calendar.js"
+pin "top", to: "top.js"
 pin "@hotwired/turbo-rails", to: "turbo.min.js"
 pin "@hotwired/stimulus", to: "stimulus.min.js"
 pin "@hotwired/stimulus-loading", to: "stimulus-loading.js"
