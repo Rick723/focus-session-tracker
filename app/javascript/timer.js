@@ -1,10 +1,127 @@
-let remaining = 1500;
+const TOTAL_DURATION_SECONDS = 1500;
+const FIVE_MINUTES_SECONDS = 300;
+const COMPLETION_RESET_DELAY_MS = document.body?.dataset.railsEnv === "test" ? null : 2200;
+const DEFAULT_STATUS_MESSAGE = "たねをまいて集中タイムを始めましょう！";
+const COMPLETION_NOTIFICATION_ENABLED_KEY = "completionNotificationEnabled";
+
+const STAGE_CONFIG = {
+  seed: {
+    label: "たね",
+    alt: "たね",
+    phase: "たねのじかん",
+    runningMessage: "..."
+  },
+  sprout: {
+    label: "ドロちゃん",
+    alt: "ドロちゃん",
+    phase: "そだちのじかん",
+    runningMessage: "ドロちゃんがすくすく育っています。"
+  },
+  harvest: {
+    label: "ポモちゃん",
+    alt: "ポモちゃん",
+    phase: "しゅうかくのじかん",
+    runningMessage: "ポモちゃんが元気に実りました！"
+  }
+};
+
+let remaining = TOTAL_DURATION_SECONDS;
 let intervalId = null;
 let startedAt = null;
 let focusSessionId = null;
 let isInitializing = false;
 let reloadRequired = false;
 let pendingUiLocked = false;
+let celebrationTimeoutId = null;
+
+function supportsDesktopCompletionNotification() {
+  return (
+    typeof window !== "undefined" &&
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(min-width: 721px)").matches &&
+    "Notification" in window &&
+    typeof Notification.requestPermission === "function"
+  );
+}
+
+function completionNotificationEnabled() {
+  return localStorage.getItem(COMPLETION_NOTIFICATION_ENABLED_KEY) === "true";
+}
+
+function setCompletionNotificationEnabled(enabled) {
+  localStorage.setItem(COMPLETION_NOTIFICATION_ENABLED_KEY, String(enabled));
+}
+
+function updateNotificationButtonState() {
+  const button = document.getElementById("timer-notification-button");
+  if (!button) return;
+
+  if (!supportsDesktopCompletionNotification()) {
+    button.hidden = true;
+    return;
+  }
+
+  button.hidden = false;
+
+  if (Notification.permission === "granted") {
+    const enabled = completionNotificationEnabled();
+    button.dataset.notificationState = enabled ? "enabled" : "disabled";
+    button.textContent = enabled ? "PC通知をオフ" : "PC通知をオン";
+    button.disabled = false;
+    return;
+  }
+
+  if (Notification.permission === "denied") {
+    button.dataset.notificationState = "denied";
+    button.textContent = "通知がブロックされています";
+    button.disabled = true;
+    return;
+  }
+
+  button.dataset.notificationState = "default";
+  button.textContent = "PC通知をオン";
+  button.disabled = false;
+}
+
+async function requestCompletionNotificationPermission() {
+  if (!supportsDesktopCompletionNotification()) return;
+
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+      setCompletionNotificationEnabled(true);
+    }
+  } catch (error) {
+    console.error("通知権限の取得に失敗しました", error);
+  } finally {
+    updateNotificationButtonState();
+  }
+}
+
+function toggleCompletionNotification() {
+  if (!supportsDesktopCompletionNotification()) return;
+
+  if (Notification.permission === "granted") {
+    setCompletionNotificationEnabled(!completionNotificationEnabled());
+    updateNotificationButtonState();
+    return;
+  }
+
+  requestCompletionNotificationPermission();
+}
+
+function notifyCompletionIfNeeded() {
+  if (!supportsDesktopCompletionNotification()) return;
+  if (Notification.permission !== "granted") return;
+  if (!completionNotificationEnabled()) return;
+  if (document.visibilityState === "visible" && document.hasFocus()) return;
+
+  new Notification("ポモちゃんが実りました！", {
+    body: "25分の集中が完了しました。次のたねもまけます。",
+    tag: "timer-complete",
+    renotify: false
+  });
+}
 
 function setPageLinksHidden(hidden) {
   const pageLinks = document.getElementById("page-links");
@@ -17,11 +134,14 @@ function installTimerTestHooks() {
   if (document.body?.dataset.railsEnv !== "test") return;
 
   window.timerTestHooks = {
-    setRemaining(value) {
-      remaining = value;
+    finishCelebration() {
+      finalizeCelebrationReset();
     },
     setFocusSessionId(value) {
       focusSessionId = value;
+    },
+    setRemaining(value) {
+      remaining = value;
     },
     stopTimer() {
       stopTimer();
@@ -40,10 +160,7 @@ function setStatusMessage(message) {
 }
 
 function clearStatusMessage() {
-  const statusMessage = document.getElementById("timer-status-message");
-  if (!statusMessage) return;
-
-  statusMessage.textContent = "";
+  setStatusMessage("");
 }
 
 function formatTime(seconds) {
@@ -59,18 +176,77 @@ function renderTimer() {
   timerDisplay.textContent = formatTime(remaining);
 }
 
-function renderCreature(icon) {
+function resolveStageFromRemaining(remainingSeconds) {
+  const elapsedSeconds = TOTAL_DURATION_SECONDS - remainingSeconds;
+
+  if (elapsedSeconds >= FIVE_MINUTES_SECONDS) {
+    return "sprout";
+  }
+
+  return "seed";
+}
+
+function updateSceneStage(stage) {
+  const timerPage = document.getElementById("timer-page");
+  if (!timerPage) return;
+
+  timerPage.dataset.stage = stage;
+}
+
+function setSceneMode(mode) {
+  const timerPage = document.getElementById("timer-page");
+  if (!timerPage) return;
+
+  timerPage.dataset.scene = mode;
+}
+
+function setCelebrationVisible(visible) {
+  const resultIcon = document.getElementById("result-icon");
+  if (!resultIcon) return;
+
+  resultIcon.hidden = !visible;
+  resultIcon.setAttribute("aria-hidden", String(!visible));
+}
+
+function renderCreature(stage) {
   const creature = document.getElementById("creature-icon");
   if (!creature) return;
 
-  creature.innerText = icon;
+  const creatureImage = document.getElementById("creature-image");
+  const creatureLabel = document.getElementById("creature-label");
+  const timerPhase = document.getElementById("timer-phase");
+  const config = STAGE_CONFIG[stage] || STAGE_CONFIG.seed;
+  const imageSource = creature.dataset[`${stage}Image`] || creature.dataset.seedImage;
+
+  creature.dataset.creatureStage = stage;
+  updateSceneStage(stage);
+
+  if (creatureImage && imageSource) {
+    creatureImage.src = imageSource;
+    creatureImage.alt = config.alt;
+  }
+
+  if (creatureLabel) {
+    creatureLabel.textContent = config.label;
+  }
+
+  if (timerPhase) {
+    timerPhase.textContent = config.phase;
+  }
 }
 
-function toggleTimerButtons(isRunning) {
+function toggleTimerButtons(isRunning, options = {}) {
+  const { hideAll = false } = options;
   const startButton = document.getElementById("start-button");
   const stopButton = document.getElementById("stop-button");
 
   if (!startButton || !stopButton) return;
+
+  if (hideAll) {
+    startButton.hidden = true;
+    stopButton.hidden = true;
+    return;
+  }
 
   if (isRunning) {
     startButton.hidden = true;
@@ -89,10 +265,39 @@ function setTimerButtonsDisabled(disabled) {
   if (stopButton) stopButton.disabled = disabled;
 }
 
+function clearPersistedTimerState() {
+  localStorage.removeItem("startedAt");
+  localStorage.removeItem("focusSessionId");
+  localStorage.removeItem("postedStartedAt");
+}
+
+function clearCelebrationTimeout() {
+  if (celebrationTimeoutId === null) return;
+
+  clearTimeout(celebrationTimeoutId);
+  celebrationTimeoutId = null;
+}
+
+function finalizeCelebrationReset() {
+  clearCelebrationTimeout();
+  resetTimer();
+}
+
+function queueCelebrationReset() {
+  if (COMPLETION_RESET_DELAY_MS === null) return;
+
+  clearCelebrationTimeout();
+  celebrationTimeoutId = setTimeout(() => {
+    finalizeCelebrationReset();
+  }, COMPLETION_RESET_DELAY_MS);
+}
+
 function lockTimerForReload(message) {
   reloadRequired = true;
   stopTimer();
   setPageLinksHidden(true);
+  setSceneMode("locked");
+  setCelebrationVisible(false);
   toggleTimerButtons(true);
   setTimerButtonsDisabled(true);
   renderTimer();
@@ -110,22 +315,23 @@ function resetTimerFor409(route, currentFocusSessionId, status, message) {
 }
 
 function resetTimer() {
+  clearCelebrationTimeout();
   reloadRequired = false;
   pendingUiLocked = false;
-  remaining = 1500;
+  remaining = TOTAL_DURATION_SECONDS;
   intervalId = null;
   startedAt = null;
   focusSessionId = null;
 
-  localStorage.removeItem("startedAt");
-  localStorage.removeItem("focusSessionId");
-  localStorage.removeItem("postedStartedAt");
-
+  clearPersistedTimerState();
   setPageLinksHidden(false);
+  setSceneMode("idle");
+  setCelebrationVisible(false);
   toggleTimerButtons(false);
   setTimerButtonsDisabled(false);
-  renderCreature("🥚");
+  renderCreature("seed");
   renderTimer();
+  setStatusMessage(DEFAULT_STATUS_MESSAGE);
 }
 
 function stopTimer() {
@@ -154,19 +360,14 @@ function restoreTimerState() {
   focusSessionId = storedFocusSessionId;
 
   if (!storedStartedAt) {
-    remaining = 1500;
-    renderCreature("🥚");
+    remaining = TOTAL_DURATION_SECONDS;
+    renderCreature("seed");
     return false;
   }
 
   const elapsedSeconds = elapsedSecondsFrom(storedStartedAt);
-  remaining = Math.max(1500 - elapsedSeconds, 0);
-
-  if (storedFocusSessionId) {
-    renderCreature("⚫");
-  } else {
-    renderCreature("🥚");
-  }
+  remaining = Math.max(TOTAL_DURATION_SECONDS - elapsedSeconds, 0);
+  renderCreature(resolveStageFromRemaining(remaining));
 
   return true;
 }
@@ -179,7 +380,7 @@ async function createFocusSession(currentStartedAt, durationSeconds, allowPendin
 
   if (currentFocusSessionId) {
     focusSessionId = currentFocusSessionId;
-    renderCreature("⚫");
+    renderCreature("sprout");
     return { status: "success" };
   }
 
@@ -220,7 +421,8 @@ async function createFocusSession(currentStartedAt, durationSeconds, allowPendin
 
     localStorage.setItem("focusSessionId", focusSessionId);
     localStorage.setItem("postedStartedAt", currentStartedAt);
-    renderCreature("⚫");
+    renderCreature("sprout");
+    setStatusMessage(STAGE_CONFIG.sprout.runningMessage);
 
     console.log("5分到達");
     console.log("startedAt", currentStartedAt);
@@ -285,7 +487,7 @@ async function completeTimer() {
     return;
   }
 
-  const patched = await patchFocusSession(1500, new Date().toISOString());
+  const patched = await patchFocusSession(TOTAL_DURATION_SECONDS, new Date().toISOString());
   if (!patched.ok) {
     if (patched.status === 409) {
       resetTimerFor409(
@@ -304,18 +506,30 @@ async function completeTimer() {
   console.log("25分完了");
   console.log("focusSessionId:", currentFocusSessionId);
 
-  // 完了通知バナー本体は ISSUE9 で扱う
-  clearStatusMessage();
-  resetTimer();
+  clearPersistedTimerState();
+  startedAt = null;
+  focusSessionId = null;
+  setPageLinksHidden(true);
+  setSceneMode("celebrating");
+  setCelebrationVisible(true);
+  toggleTimerButtons(true, { hideAll: true });
+  setTimerButtonsDisabled(true);
+  renderCreature("harvest");
+  setStatusMessage("ポモちゃんが実りました！ 次のたねもまけます。");
+  notifyCompletionIfNeeded();
+  queueCelebrationReset();
 }
 
 async function finalizeExpiredTimer() {
   const currentStartedAt = startedAt || localStorage.getItem("startedAt");
   const currentFocusSessionId = focusSessionId || localStorage.getItem("focusSessionId");
 
+  remaining = 0;
+  renderTimer();
+
   // MVPでは25分超過時も25分固定で扱う
   if (!currentFocusSessionId) {
-    const created = await createFocusSession(currentStartedAt, 1500, true);
+    const created = await createFocusSession(currentStartedAt, TOTAL_DURATION_SECONDS, true);
     if (created.status === "failure") {
       lockTimerForReload("保存に失敗しました。再読み込みして復旧をお試しください。");
       return;
@@ -324,6 +538,8 @@ async function finalizeExpiredTimer() {
     if (created.status === "pending") {
       pendingUiLocked = true;
       setPageLinksHidden(true);
+      setSceneMode("pending");
+      renderCreature("sprout");
       toggleTimerButtons(true);
       setTimerButtonsDisabled(true);
       setStatusMessage("保存処理を確認中です。少し待ってから再読み込みしてください。");
@@ -338,9 +554,9 @@ async function tick() {
   remaining -= 1;
   renderTimer();
 
-  const durationSeconds = 1500 - remaining;
+  const durationSeconds = TOTAL_DURATION_SECONDS - remaining;
 
-  if (remaining === 1200) {
+  if (remaining === TOTAL_DURATION_SECONDS - FIVE_MINUTES_SECONDS) {
     const currentStartedAt = startedAt || localStorage.getItem("startedAt");
     const created = await createFocusSession(currentStartedAt, durationSeconds);
     if (created.status === "failure") {
@@ -358,9 +574,10 @@ function startTimer() {
   if (isInitializing) return;
   if (intervalId !== null) return;
 
+  clearCelebrationTimeout();
   reloadRequired = false;
   pendingUiLocked = false;
-  remaining = 1500;
+  remaining = TOTAL_DURATION_SECONDS;
   startedAt = new Date().toISOString();
   focusSessionId = null;
 
@@ -368,12 +585,14 @@ function startTimer() {
   localStorage.removeItem("focusSessionId");
   localStorage.removeItem("postedStartedAt");
 
-  clearStatusMessage();
+  setSceneMode("running");
   setPageLinksHidden(true);
+  setCelebrationVisible(false);
   toggleTimerButtons(true);
   setTimerButtonsDisabled(false);
-  renderCreature("🥚");
+  renderCreature("seed");
   renderTimer();
+  setStatusMessage(STAGE_CONFIG.seed.runningMessage);
 
   intervalId = setInterval(() => {
     tick();
@@ -385,11 +604,10 @@ async function handleStop() {
 
   stopTimer();
 
-  const durationSeconds = 1500 - remaining;
+  const durationSeconds = TOTAL_DURATION_SECONDS - remaining;
   const currentFocusSessionId = focusSessionId || localStorage.getItem("focusSessionId");
 
   if (!currentFocusSessionId) {
-    clearStatusMessage();
     resetTimer();
     return;
   }
@@ -410,7 +628,6 @@ async function handleStop() {
     return;
   }
 
-  clearStatusMessage();
   resetTimer();
 }
 
@@ -426,20 +643,22 @@ async function initializeTimer() {
     if (!hasStoredTimer) {
       reloadRequired = false;
       setPageLinksHidden(false);
+      setSceneMode("idle");
+      setCelebrationVisible(false);
       toggleTimerButtons(false);
-      clearStatusMessage();
+      setStatusMessage(DEFAULT_STATUS_MESSAGE);
       return;
     }
 
-    // A: 25分超過再訪時は通常復元より先に専用経路へ
+    // 25分超過再訪時は通常復元より先に専用経路へ
     if (remaining <= 0) {
       await finalizeExpiredTimer();
       return;
     }
 
-    const durationSeconds = 1500 - remaining;
+    const durationSeconds = TOTAL_DURATION_SECONDS - remaining;
 
-    if (durationSeconds >= 300) {
+    if (durationSeconds >= FIVE_MINUTES_SECONDS) {
       const created = await createFocusSession(startedAt, durationSeconds);
 
       if (created.status === "failure") {
@@ -449,7 +668,10 @@ async function initializeTimer() {
     }
 
     setPageLinksHidden(true);
+    setSceneMode("running");
+    setCelebrationVisible(false);
     toggleTimerButtons(true);
+    setStatusMessage(STAGE_CONFIG[resolveStageFromRemaining(remaining)].runningMessage);
 
     if (intervalId === null) {
       intervalId = setInterval(() => {
@@ -463,10 +685,15 @@ async function initializeTimer() {
 }
 
 document.addEventListener("turbo:load", () => {
+  const timerPage = document.getElementById("timer-page");
   const startButton = document.getElementById("start-button");
   const stopButton = document.getElementById("stop-button");
+  const notificationButton = document.getElementById("timer-notification-button");
+
+  if (!timerPage) return;
 
   installTimerTestHooks();
+  updateNotificationButtonState();
   initializeTimer();
 
   if (startButton && !startButton.dataset.bound) {
@@ -483,6 +710,13 @@ document.addEventListener("turbo:load", () => {
       if (!confirmed) return;
 
       handleStop();
+    });
+  }
+
+  if (notificationButton && !notificationButton.dataset.bound) {
+    notificationButton.dataset.bound = "true";
+    notificationButton.addEventListener("click", () => {
+      toggleCompletionNotification();
     });
   }
 });

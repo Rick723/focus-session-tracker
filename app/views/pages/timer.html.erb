@@ -1,67 +1,107 @@
-<!-- app/views/pages/timer.html.erb -->
-<!-- TODO(ISSUE8以降):
-  running中はリンク非表示にする
--->
+<%# Background artwork desktop: app/assets/images/timer_images/farm_layout/*_16:9.png %>
+<%# Background artwork mobile: app/assets/images/timer_images/farm_layout/*_3:4.png %>
+<%# Creature artwork: app/assets/images/creature_images/normal_creature/*.png %>
+<%# Timer frame artwork: app/assets/images/timer_images/tomato_timer/timer_display.png %>
+<%# NOTE: completed modal artwork uses the repository file name "compleated_creature.png". %>
 
-<div id="timer-page" class="min-h-screen flex flex-col bg-stone-50">
-  <!-- 画面上部 -->
-  <header class="flex items-center w-full px-8 h-16 border-b-2 border-dashed border-gray-300 shrink-0">
-    <nav id="page-links" class="flex space-x-8">
-      <%= link_to "トップに戻る", root_path,
-        class: "text-blue-600 underline font-medium hover:text-blue-800 text-lg" %>
+<div
+  id="timer-page"
+  class="timer-page"
+  data-stage="seed"
+  data-scene="idle"
+  style="
+    --timer-bg-seed-desktop-image: url('<%= asset_path('timer_images/farm_layout/first_phase_16:9.png') %>');
+    --timer-bg-sprout-desktop-image: url('<%= asset_path('timer_images/farm_layout/second_phase_16:9.png') %>');
+    --timer-bg-harvest-desktop-image: url('<%= asset_path('timer_images/farm_layout/final_phase_16:9.png') %>');
+    --timer-bg-seed-mobile-image: url('<%= asset_path('timer_images/farm_layout/first_phase_3:4.png') %>');
+    --timer-bg-sprout-mobile-image: url('<%= asset_path('timer_images/farm_layout/second_phase_3:4.png') %>');
+    --timer-bg-harvest-mobile-image: url('<%= asset_path('timer_images/farm_layout/final_phase_3:4.png') %>');
+    --timer-frame-image: url('<%= asset_path('timer_images/tomato_timer/timer_display.png') %>');
+  "
+>
+  <header class="timer-page__header">
+    <div class="timer-page__header-row">
+      <nav id="page-links" class="timer-page__nav" aria-label="ページ導線">
+        <%= link_to "トップへ", root_path, class: "wood-sign wood-sign--header" %>
+        <%= link_to "きろくをみる", calendar_path, class: "wood-sign wood-sign--header" %>
+      </nav>
 
-      <%= link_to "カレンダーを見る", calendar_path,
-        class: "text-blue-600 underline font-medium hover:text-blue-800 text-lg" %>
-    </nav>
+      <button
+        id="timer-notification-button"
+        type="button"
+        class="timer-notification-button"
+        hidden
+      >
+        PC通知をオン
+      </button>
+    </div>
   </header>
 
-  <!-- 画面中央 -->
-  <main
-    id="timer-root"
-    class="flex-1 flex flex-col items-center justify-center space-y-10 pb-8"
-  >
-    <!-- キャラクター表示 -->
-    <div id="creature-icon" class="text-[120px] leading-none">
-      🥚
+  <main id="timer-root" class="timer-scene">
+    <div id="result-icon" class="timer-result" hidden aria-hidden="true">
+      <div class="timer-result__scrim" aria-hidden="true"></div>
+      <section class="timer-result__card" aria-label="完了演出">
+        <img
+          class="timer-result__image"
+          src="<%= asset_path('creature_images/normal_creature/compleated_creature.png') %>"
+          alt="よろこんでいるポモちゃん"
+        >
+        <p class="timer-result__eyebrow">ポモドーロ完了</p>
+        <p class="timer-result__title">しゅうかく！</p>
+        <p class="timer-result__text">ポモちゃんが元気に実りました</p>
+      </section>
     </div>
 
-    <!-- タイマー表示 -->
-    <div
-      id="time"
-      class="text-8xl font-mono text-gray-800 tracking-widest"
-      aria-live="polite"
-    >
-      25:00
-    </div>
+    <section class="timer-hero" aria-live="polite">
+      <div class="timer-stage">
+        <figure
+          id="creature-icon"
+          class="timer-creature"
+          data-creature-stage="seed"
+          data-seed-image="<%= asset_path('creature_images/normal_creature/seed_creature.png') %>"
+          data-sprout-image="<%= asset_path('creature_images/normal_creature/doro-chan0 Image.png') %>"
+          data-harvest-image="<%= asset_path('creature_images/normal_creature/pomo-chan Image.png') %>"
+        >
+          <img
+            id="creature-image"
+            class="timer-creature__image"
+            src="<%= asset_path('creature_images/normal_creature/seed_creature.png') %>"
+            alt="たね"
+          >
+          <figcaption id="creature-label" class="timer-creature__label">たね</figcaption>
+        </figure>
 
-    <!-- 操作ボタン -->
-    <div id="timer-actions" class="flex items-center justify-center">
+        <section class="tomato-timer" aria-labelledby="time">
+          <div class="tomato-timer__frame" aria-hidden="true"></div>
+          <div class="tomato-timer__display">
+            <div id="time" class="tomato-timer__time" aria-live="polite">25:00</div>
+            <p id="timer-phase" class="tomato-timer__phase">たねのじかん</p>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <div id="timer-actions" class="timer-actions">
+      <button
+        id="start-button"
+        type="button"
+        class="wood-sign wood-sign--button"
+      >
+        たねをまく
+      </button>
+
       <button
         id="stop-button"
         type="button"
         hidden
-        class="border-4 border-gray-800 bg-gray-100 px-20 py-4 text-2xl font-bold rounded-lg hover:bg-gray-200 transition-colors"
+        class="wood-sign wood-sign--button wood-sign--button-secondary"
       >
-        Stop
-      </button>
-
-      <button
-        id="start-button"
-        type="button"
-        class="border-4 border-gray-800 bg-gray-100 px-20 py-4 text-2xl font-bold rounded-lg hover:bg-gray-200 transition-colors"
-      >
-        Start
+        ひとやすみ
       </button>
     </div>
 
-    <!-- 進化演出の表示領域 -->
-    <div id="result-icon">
-      <!-- TODO(ISSUE8以降): 25分達成時に進化演出 -->
-    </div>
-
-    <!-- 将来の状態メッセージ -->
-    <div id="timer-status-message" class="min-h-[2rem] text-base text-gray-600">
-      <!-- TODO(ISSUE8以降): 状態メッセージ表示 -->
-    </div>
+    <p id="timer-status-message" class="timer-status-board" role="status" aria-live="polite">
+      たねをまいて集中開始！
+    </p>
   </main>
 </div>

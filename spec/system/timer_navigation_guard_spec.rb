@@ -23,6 +23,8 @@ RSpec.describe "タイマー導線制御", type: :system, js: true do
     expect(page).to have_selector("#start-button", visible: :visible)
     expect(page).to have_selector("#stop-button[hidden]", visible: :all)
     expect(page).to have_selector("#time", text: "25:00")
+    expect(page).to have_selector("#creature-icon[data-creature-stage='seed']")
+    expect(page).to have_selector("#timer-status-message", text: "たねをまいて集中タイムを始めましょう！")
     expect(FocusSession.count).to eq(0)
 
     values = page.evaluate_script(<<~JS)
