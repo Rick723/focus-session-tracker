@@ -23,7 +23,7 @@
     <div class="timer-page__header-row">
       <nav id="page-links" class="timer-page__nav" aria-label="ページ導線">
         <%= link_to "トップへ", root_path, class: "wood-sign wood-sign--header" %>
-        <%= link_to "きろくをみる", calendar_path, class: "wood-sign wood-sign--header" %>
+        <%= link_to "記録を見る", calendar_path, class: "wood-sign wood-sign--header" %>
       </nav>
 
       <button
@@ -49,6 +49,15 @@
         <p class="timer-result__eyebrow">ポモドーロ完了</p>
         <p class="timer-result__title">しゅうかく！</p>
         <p class="timer-result__text">ポモちゃんが元気に実りました</p>
+        <div class="timer-result__actions">
+          <button
+            id="timer-result-confirm"
+            type="button"
+            class="wood-sign wood-sign--button timer-result__confirm"
+          >
+            次のたねをまく
+          </button>
+        </div>
       </section>
     </div>
 
@@ -101,7 +110,7 @@
     </div>
 
     <p id="timer-status-message" class="timer-status-board" role="status" aria-live="polite">
-      たねをまいて集中開始！
+      たねをまいて集中タイムを始めましょう！
     </p>
   </main>
 </div>

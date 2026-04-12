@@ -21,6 +21,6 @@ RSpec.describe "タイマー復元 UI", type: :system, js: true do
     expect(page).to have_selector("#creature-icon[data-creature-stage='sprout']")
     expect(page).to have_selector("#stop-button", visible: :visible)
     expect(page).to have_no_selector("#page-links", visible: :visible)
-    expect(page).to have_selector("#timer-status-message", text: "ドロちゃんがすくすく育っています。")
+    expect(page).to have_selector("#timer-status-message", text: "その調子！ドロちゃんがすくすく育っています")
   end
 end

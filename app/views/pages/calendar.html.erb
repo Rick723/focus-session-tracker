@@ -1,16 +1,21 @@
-<div class="calendar-page">
+<div
+  class="calendar-page"
+  data-calendar-page
+  data-completed-icon-large="<%= calendar_session_kind_icon_path(:completed, size: 64) %>"
+  data-five-minutes-icon-large="<%= calendar_session_kind_icon_path(:reached_five_minutes, size: 64) %>"
+>
   <header class="calendar-header">
-    <div>
-      <p class="calendar-eyebrow">Monthly Review</p>
-      <h1 class="calendar-title"><%= @display_month.strftime("%Y年%-m月") %> の成果</h1>
+    <div class="calendar-header__copy">
+      <p class="calendar-eyebrow">Growing Records</p>
+      <h1 class="calendar-title"><%= @display_month.strftime("%Y年%-m月") %> の育成記録</h1>
       <p class="calendar-description">
-        1セッション = 1 pomo-doro として、日ごとの成果を振り返れます。
+        5分から育った集中時間を、日ごとの記録として振り返れます。
       </p>
     </div>
 
     <nav class="calendar-actions" aria-label="ページ移動">
-      <%= link_to "トップ", root_path, class: "calendar-link-button calendar-link-button-secondary" %>
-      <%= link_to "タイマー", timer_path, class: "calendar-link-button calendar-link-button-secondary" %>
+      <%= link_to "トップへ", root_path, class: "calendar-link-button calendar-link-button-secondary" %>
+      <%= link_to "集中を始める", timer_path, class: "calendar-link-button calendar-link-button-secondary" %>
     </nav>
   </header>
 
@@ -39,10 +44,20 @@
           <div class="calendar-day-body">
             <p class="calendar-duration"><%= focus_duration_label(summary[:total_focus_seconds]) %></p>
 
-            <div class="calendar-badges">
+            <div class="calendar-badges" aria-label="記録種別">
               <% summary[:pomo_doro_items].each do |item| %>
                 <span class="<%= pomo_doro_badge_class(item[:kind]) %>">
-                  <%= "#{item[:label]} #{item[:count]}" %>
+                  <img
+                    class="calendar-badge__icon"
+                    src="<%= calendar_session_kind_icon_path(item[:kind], size: 32) %>"
+                    alt="<%= calendar_session_kind_label(item[:kind]) %>"
+                    width="32"
+                    height="32"
+                  >
+                  <span class="calendar-badge__meta">
+                    <span class="calendar-badge__label"><%= item[:label] %></span>
+                    <span class="calendar-badge__count"><%= item[:count] %>回</span>
+                  </span>
                 </span>
               <% end %>
             </div>
@@ -63,6 +78,7 @@
       </div>
 
       <p class="calendar-modal-date" data-calendar-modal-date></p>
+      <div class="calendar-modal-summary" data-calendar-modal-summary hidden></div>
       <p class="calendar-modal-empty" data-calendar-modal-empty hidden>この日の記録はありません</p>
       <div class="calendar-modal-list" data-calendar-modal-list></div>
     </div>

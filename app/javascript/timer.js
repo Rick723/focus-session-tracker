@@ -1,21 +1,21 @@
 const TOTAL_DURATION_SECONDS = 1500;
 const FIVE_MINUTES_SECONDS = 300;
-const COMPLETION_RESET_DELAY_MS = document.body?.dataset.railsEnv === "test" ? null : 2200;
 const DEFAULT_STATUS_MESSAGE = "たねをまいて集中タイムを始めましょう！";
 const COMPLETION_NOTIFICATION_ENABLED_KEY = "completionNotificationEnabled";
+const POST_CELEBRATION_RESET_DELAY_MS = document.body?.dataset.railsEnv === "test" ? null : 2000;
 
 const STAGE_CONFIG = {
   seed: {
     label: "たね",
     alt: "たね",
     phase: "たねのじかん",
-    runningMessage: "..."
+    runningMessage: "まずは５分だけ集中を続けましょう"
   },
   sprout: {
     label: "ドロちゃん",
     alt: "ドロちゃん",
     phase: "そだちのじかん",
-    runningMessage: "ドロちゃんがすくすく育っています。"
+    runningMessage: "その調子！ドロちゃんがすくすく育っています"
   },
   harvest: {
     label: "ポモちゃん",
@@ -32,7 +32,7 @@ let focusSessionId = null;
 let isInitializing = false;
 let reloadRequired = false;
 let pendingUiLocked = false;
-let celebrationTimeoutId = null;
+let postCelebrationResetTimeoutId = null;
 
 function supportsDesktopCompletionNotification() {
   return (
@@ -45,7 +45,13 @@ function supportsDesktopCompletionNotification() {
 }
 
 function completionNotificationEnabled() {
-  return localStorage.getItem(COMPLETION_NOTIFICATION_ENABLED_KEY) === "true";
+  const savedValue = localStorage.getItem(COMPLETION_NOTIFICATION_ENABLED_KEY);
+
+  if (savedValue === null) {
+    return Notification.permission === "granted";
+  }
+
+  return savedValue === "true";
 }
 
 function setCompletionNotificationEnabled(enabled) {
@@ -64,6 +70,10 @@ function updateNotificationButtonState() {
   button.hidden = false;
 
   if (Notification.permission === "granted") {
+    if (localStorage.getItem(COMPLETION_NOTIFICATION_ENABLED_KEY) === null) {
+      setCompletionNotificationEnabled(true);
+    }
+
     const enabled = completionNotificationEnabled();
     button.dataset.notificationState = enabled ? "enabled" : "disabled";
     button.textContent = enabled ? "PC通知をオフ" : "PC通知をオン";
@@ -114,12 +124,9 @@ function notifyCompletionIfNeeded() {
   if (!supportsDesktopCompletionNotification()) return;
   if (Notification.permission !== "granted") return;
   if (!completionNotificationEnabled()) return;
-  if (document.visibilityState === "visible" && document.hasFocus()) return;
 
   new Notification("ポモちゃんが実りました！", {
-    body: "25分の集中が完了しました。次のたねもまけます。",
-    tag: "timer-complete",
-    renotify: false
+    body: "25分の集中が完了しました。ひとやすみして次のたねをまきましょう！"
   });
 }
 
@@ -202,10 +209,15 @@ function setSceneMode(mode) {
 
 function setCelebrationVisible(visible) {
   const resultIcon = document.getElementById("result-icon");
+  const resultConfirmButton = document.getElementById("timer-result-confirm");
   if (!resultIcon) return;
 
   resultIcon.hidden = !visible;
   resultIcon.setAttribute("aria-hidden", String(!visible));
+
+  if (resultConfirmButton) {
+    resultConfirmButton.disabled = false;
+  }
 }
 
 function renderCreature(stage) {
@@ -271,25 +283,29 @@ function clearPersistedTimerState() {
   localStorage.removeItem("postedStartedAt");
 }
 
-function clearCelebrationTimeout() {
-  if (celebrationTimeoutId === null) return;
+function clearPostCelebrationResetTimeout() {
+  if (postCelebrationResetTimeoutId === null) return;
 
-  clearTimeout(celebrationTimeoutId);
-  celebrationTimeoutId = null;
+  clearTimeout(postCelebrationResetTimeoutId);
+  postCelebrationResetTimeoutId = null;
 }
 
 function finalizeCelebrationReset() {
-  clearCelebrationTimeout();
+  clearPostCelebrationResetTimeout();
   resetTimer();
 }
 
-function queueCelebrationReset() {
-  if (COMPLETION_RESET_DELAY_MS === null) return;
+function queuePostCelebrationReset() {
+  clearPostCelebrationResetTimeout();
 
-  clearCelebrationTimeout();
-  celebrationTimeoutId = setTimeout(() => {
+  if (POST_CELEBRATION_RESET_DELAY_MS === null) {
     finalizeCelebrationReset();
-  }, COMPLETION_RESET_DELAY_MS);
+    return;
+  }
+
+  postCelebrationResetTimeoutId = setTimeout(() => {
+    finalizeCelebrationReset();
+  }, POST_CELEBRATION_RESET_DELAY_MS);
 }
 
 function lockTimerForReload(message) {
@@ -315,7 +331,7 @@ function resetTimerFor409(route, currentFocusSessionId, status, message) {
 }
 
 function resetTimer() {
-  clearCelebrationTimeout();
+  clearPostCelebrationResetTimeout();
   reloadRequired = false;
   pendingUiLocked = false;
   remaining = TOTAL_DURATION_SECONDS;
@@ -517,7 +533,6 @@ async function completeTimer() {
   renderCreature("harvest");
   setStatusMessage("ポモちゃんが実りました！ 次のたねもまけます。");
   notifyCompletionIfNeeded();
-  queueCelebrationReset();
 }
 
 async function finalizeExpiredTimer() {
@@ -574,7 +589,7 @@ function startTimer() {
   if (isInitializing) return;
   if (intervalId !== null) return;
 
-  clearCelebrationTimeout();
+  clearPostCelebrationResetTimeout();
   reloadRequired = false;
   pendingUiLocked = false;
   remaining = TOTAL_DURATION_SECONDS;
@@ -689,6 +704,7 @@ document.addEventListener("turbo:load", () => {
   const startButton = document.getElementById("start-button");
   const stopButton = document.getElementById("stop-button");
   const notificationButton = document.getElementById("timer-notification-button");
+  const resultConfirmButton = document.getElementById("timer-result-confirm");
 
   if (!timerPage) return;
 
@@ -717,6 +733,16 @@ document.addEventListener("turbo:load", () => {
     notificationButton.dataset.bound = "true";
     notificationButton.addEventListener("click", () => {
       toggleCompletionNotification();
+    });
+  }
+
+  if (resultConfirmButton && !resultConfirmButton.dataset.bound) {
+    resultConfirmButton.dataset.bound = "true";
+    resultConfirmButton.addEventListener("click", () => {
+      resultConfirmButton.disabled = true;
+      setCelebrationVisible(false);
+      setStatusMessage("次のたねを準備しています…");
+      queuePostCelebrationReset();
     });
   }
 });

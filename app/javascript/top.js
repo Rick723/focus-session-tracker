@@ -1,4 +1,9 @@
 let boundTopModal = null;
+let boundTopPage = null;
+let boundTopOpenButton = null;
+let boundTopOpenHandler = null;
+let boundTopCloseBindings = [];
+let boundTopKeydownHandler = null;
 
 function openTopModal(modal) {
   modal.hidden = false;
@@ -10,41 +15,77 @@ function closeTopModal(modal) {
   document.body.style.overflow = "";
 }
 
+function cleanupTopModal() {
+  if (boundTopOpenButton && boundTopOpenHandler) {
+    boundTopOpenButton.removeEventListener("click", boundTopOpenHandler);
+  }
+
+  boundTopCloseBindings.forEach(({ element, handler }) => {
+    element.removeEventListener("click", handler);
+  });
+  boundTopCloseBindings = [];
+
+  if (boundTopKeydownHandler) {
+    document.removeEventListener("keydown", boundTopKeydownHandler);
+    boundTopKeydownHandler = null;
+  }
+
+  if (boundTopModal && !boundTopModal.hidden) {
+    closeTopModal(boundTopModal);
+  }
+
+  if (boundTopPage) {
+    delete boundTopPage.dataset.topBound;
+  }
+
+  boundTopModal = null;
+  boundTopPage = null;
+  boundTopOpenButton = null;
+  boundTopOpenHandler = null;
+}
+
 function initializeTopModal() {
   const topPage = document.querySelector("[data-top-page]");
   const modal = document.querySelector("[data-top-modal]");
   const openButton = document.querySelector("[data-top-modal-open]");
 
-  if (!topPage || !modal || !openButton) return;
+  if (!topPage || !modal || !openButton) {
+    cleanupTopModal();
+    return;
+  }
 
   if (boundTopModal && boundTopModal !== modal) {
-    document.removeEventListener("keydown", boundTopModal.__topModalKeydownHandler);
-    boundTopModal = null;
+    cleanupTopModal();
   }
 
   if (topPage.dataset.topBound === "true") return;
 
   topPage.dataset.topBound = "true";
+  boundTopPage = topPage;
+  boundTopModal = modal;
+  boundTopOpenButton = openButton;
 
-  openButton.addEventListener("click", () => {
+  boundTopOpenHandler = () => {
     openTopModal(modal);
-  });
+  };
+  openButton.addEventListener("click", boundTopOpenHandler);
 
   modal.querySelectorAll("[data-top-modal-close]").forEach((element) => {
-    element.addEventListener("click", () => {
+    const closeHandler = () => {
       if (!modal.hidden) closeTopModal(modal);
-    });
+    };
+
+    boundTopCloseBindings.push({ element, handler: closeHandler });
+    element.addEventListener("click", closeHandler);
   });
 
-  const keydownHandler = (event) => {
+  boundTopKeydownHandler = (event) => {
     if (event.key !== "Escape" || modal.hidden) return;
 
     closeTopModal(modal);
   };
-
-  modal.__topModalKeydownHandler = keydownHandler;
-  boundTopModal = modal;
-  document.addEventListener("keydown", keydownHandler);
+  document.addEventListener("keydown", boundTopKeydownHandler);
 }
 
 document.addEventListener("turbo:load", initializeTopModal);
+document.addEventListener("turbo:before-cache", cleanupTopModal);

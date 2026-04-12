@@ -9,6 +9,7 @@ RSpec.describe "タイマー完了フロー", type: :system, js: true do
     visit timer_path
 
     find("#start-button").click
+    expect(page).to have_selector("#stop-button", visible: :visible)
     page.execute_script("window.timerTestHooks.stopTimer()")
 
     page.execute_script("window.timerTestHooks.setRemaining(1201)")
@@ -40,9 +41,10 @@ RSpec.describe "タイマー完了フロー", type: :system, js: true do
     expect(focus_session.completed_at).to be_present
     expect(page).to have_selector("#creature-icon[data-creature-stage='harvest']")
     expect(page).to have_selector("#result-icon", visible: :visible)
+    expect(page).to have_selector("#timer-result-confirm", visible: :visible)
     expect(page).to have_selector("#timer-status-message", text: "ポモちゃんが実りました！ 次のたねもまけます。")
 
-    page.execute_script("window.timerTestHooks.finishCelebration()")
+    find("#timer-result-confirm", visible: :visible).click
 
     expect(page).to have_selector("#time", text: "25:00")
     expect(page).to have_selector("#creature-icon[data-creature-stage='seed']")

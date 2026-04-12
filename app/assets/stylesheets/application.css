@@ -77,9 +77,9 @@ a {
   --top-hero-image: var(--top-hero-desktop-image);
   position: relative;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  padding: clamp(18px, 2.8vw, 40px) clamp(28px, 4vw, 56px) clamp(28px, 4vw, 56px);
+  padding: clamp(28px, 4vw, 56px);
   overflow: hidden;
   isolation: isolate;
   background:
@@ -130,7 +130,6 @@ a {
   display: grid;
   grid-template-columns: 1fr;
   justify-items: center;
-  margin-top: clamp(6px, 1vw, 18px);
 }
 
 .top-hero__copy {
@@ -139,9 +138,8 @@ a {
 }
 
 .top-hero__copy {
-  width: min(760px, 100%);
-  margin-top: clamp(34px, 5vw, 72px);
-  padding: clamp(28px, 3.5vw, 44px);
+  width: min(860px, 100%);
+  padding: clamp(30px, 3.8vw, 48px);
   border: 1px solid rgba(222, 209, 184, 0.9);
   border-radius: 32px;
   background: rgba(255, 252, 245, 0.78);
@@ -151,7 +149,7 @@ a {
 }
 
 .top-hero__heading-group {
-  max-width: 640px;
+  max-width: 700px;
   margin: 0 auto;
 }
 
@@ -210,7 +208,7 @@ a {
 
 .top-info-button {
   position: absolute;
-  top: clamp(8px, 1.2vw, 14px);
+  top: clamp(14px, 2vw, 22px);
   right: clamp(14px, 2vw, 22px);
   z-index: 2;
   border: 1px solid rgba(218, 205, 180, 0.92);
@@ -329,7 +327,7 @@ a {
 
 @media (max-width: 860px) {
   .top-hero {
-    padding: 16px 20px 20px;
+    padding: 20px;
   }
 
   .top-hero__mascot {
@@ -353,15 +351,15 @@ a {
   }
 
   .top-hero__copy {
-    margin-top: 54px;
-    padding: 24px 22px;
+    width: min(800px, 100%);
+    padding: 26px 24px;
   }
 }
 
 @media (max-width: 720px) {
   .top-hero {
     --top-hero-image: var(--top-hero-mobile-image);
-    padding: 10px 14px 22px;
+    padding: 16px 14px 22px;
     background-position: center top;
   }
 
@@ -371,7 +369,6 @@ a {
   }
 
   .top-hero__copy {
-    margin-top: 46px;
     padding: 22px 18px;
     border-radius: 26px;
   }
@@ -416,7 +413,7 @@ a {
   }
 
   .top-info-button {
-    top: 8px;
+    top: 12px;
     right: 12px;
     min-height: 36px;
     padding: 7px 10px;
@@ -815,6 +812,7 @@ a {
   font-size: 14px;
   font-weight: 700;
   line-height: 1.2;
+  white-space: nowrap;
   box-shadow: 0 12px 22px rgba(98, 67, 34, 0.1);
   cursor: pointer;
   transition: transform 0.15s ease, filter 0.15s ease, opacity 0.15s ease;
@@ -1199,6 +1197,29 @@ a {
   color: rgba(89, 58, 31, 0.86);
 }
 
+.timer-result__actions {
+  width: 100%;
+  padding-top: 6px;
+  display: flex;
+  justify-content: center;
+}
+
+.timer-result__confirm {
+  width: min(460px, 100%);
+  min-height: 58px;
+  padding: 14px 34px;
+  font-size: clamp(16px, 1.35vw, 21px);
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  text-align: center;
+  background-image:
+    radial-gradient(circle at 9% 52%, rgba(101, 60, 32, 0.9) 0 4px, transparent 4.5px),
+    radial-gradient(circle at 91% 52%, rgba(101, 60, 32, 0.9) 0 4px, transparent 4.5px),
+    repeating-linear-gradient(180deg, rgba(255, 226, 173, 0.22) 0 2px, rgba(255, 226, 173, 0) 2px 8px),
+    linear-gradient(180deg, #cf9952 0%, #af7439 48%, #875127 100%);
+}
+
 .timer-page[data-scene="celebrating"] .timer-stage {
   transform: scale(0.985);
   transition: transform 0.2s ease;
@@ -1206,10 +1227,6 @@ a {
 
 .timer-page[data-scene="celebrating"] .timer-creature__image {
   animation: creature-bounce 0.9s ease-in-out infinite alternate;
-}
-
-.timer-page[data-scene="celebrating"] .tomato-timer__frame {
-  animation: timer-float 1.6s ease-in-out infinite;
 }
 
 @keyframes creature-bounce {
@@ -1280,12 +1297,6 @@ a {
 
   .timer-page__nav {
     gap: 12px;
-  }
-
-  .timer-notification-button {
-    min-height: 40px;
-    padding: 8px 12px;
-    font-size: 13px;
   }
 
   .timer-scene {
