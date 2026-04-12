@@ -566,7 +566,7 @@ async function finalizeExpiredTimer() {
 }
 
 async function tick() {
-  remaining -= 1;
+  remaining -= 300;
   renderTimer();
 
   const durationSeconds = TOTAL_DURATION_SECONDS - remaining;

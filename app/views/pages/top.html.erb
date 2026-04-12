@@ -55,6 +55,18 @@
           target: "_blank",
           rel: "noopener noreferrer" %>
       </div>
+
+      <div class="top-hero__utility">
+        <button
+          type="button"
+          class="top-hero__utility-link"
+          data-top-modal-open
+          aria-haspopup="dialog"
+          aria-controls="top-privacy-modal"
+        >
+          プライバシーポリシー
+        </button>
+      </div>
     </div>
   </section>
 
@@ -84,6 +96,61 @@
         <p>
           ・Xで、これから始めるタスクを宣言できます。
         </p>
+      </div>
+    </section>
+  </div>
+
+  <div id="top-privacy-modal" class="top-modal" data-top-modal hidden>
+    <div class="top-modal__backdrop" data-top-modal-close></div>
+    <section
+      class="top-modal__panel top-modal__panel--wide"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="top-privacy-modal-title"
+      aria-describedby="top-privacy-modal-description"
+    >
+      <div class="top-modal__header">
+        <h2 id="top-privacy-modal-title" class="top-modal__title">プライバシーポリシー</h2>
+        <button type="button" class="top-modal__close" data-top-modal-close aria-label="閉じる">
+          閉じる
+        </button>
+      </div>
+
+      <div id="top-privacy-modal-description" class="top-modal__body top-modal__body--policy">
+        <section class="top-modal__section">
+          <h3 class="top-modal__section-title">匿名ユーザー方式について</h3>
+          <p>
+            このアプリはログイン機能を持たず、匿名ユーザー方式で動作しています。同じブラウザで使い続けられるように、
+            利用者を見分けるための最小限の情報を保存しています。
+          </p>
+        </section>
+
+        <section class="top-modal__section">
+          <h3 class="top-modal__section-title">取得・保存する情報</h3>
+          <p>
+            cookie には <code>anonymous_token</code> を保存しています。これは、同じブラウザの利用者を識別するための値です。
+          </p>
+          <p>
+            <code>localStorage</code> には <code>startedAt</code>、<code>focusSessionId</code>、<code>postedStartedAt</code>
+            を保存しています。これらは、進行中タイマーの復元や、5分到達時の重複POST防止に使っています。
+          </p>
+        </section>
+
+        <section class="top-modal__section">
+          <h3 class="top-modal__section-title">利用目的</h3>
+          <p>
+            保存している情報は、アプリの基本動作を実現するためだけに利用しています。匿名のまま集中記録を残し、
+            タイマー画面を再表示したときも途中状態をできるだけ自然に復元できるようにするためです。
+          </p>
+        </section>
+
+        <section class="top-modal__section">
+          <h3 class="top-modal__section-title">ご注意</h3>
+          <p>
+            cookie や <code>localStorage</code> を削除すると、履歴や進行中タイマーの状態が失われることがあります。
+            また、ブラウザや端末をまたいで履歴を共有することはできません。
+          </p>
+        </section>
       </div>
     </section>
   </div>

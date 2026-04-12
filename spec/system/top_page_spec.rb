@@ -14,6 +14,7 @@ RSpec.describe "トップ画面", type: :system, js: true do
     expect(page).to have_link("記録を見る", href: calendar_path)
     expect(page).to have_link("Xで宣言する", href: /twitter\.com\/intent\/tweet/)
     expect(page).to have_selector("[data-top-modal-open]", text: "アプリについて")
+    expect(page).to have_selector("[data-top-modal-open]", text: "プライバシーポリシー")
   end
 
   it "インフォメーションボタンから説明モーダルを開閉できる" do
@@ -21,7 +22,7 @@ RSpec.describe "トップ画面", type: :system, js: true do
 
     expect(page).to have_selector("[data-top-modal][hidden]", visible: :all)
 
-    find("[data-top-modal-open]").click
+    find("[data-top-modal-open][aria-controls='top-info-modal']").click
 
     expect(page).to have_selector("[data-top-modal]", visible: :visible)
     expect(page).to have_selector("#top-modal-title", text: "アプリについて")
@@ -33,5 +34,30 @@ RSpec.describe "トップ画面", type: :system, js: true do
     find(".top-modal__close", visible: :visible).click
 
     expect(page).to have_selector("[data-top-modal][hidden]", visible: :all)
+  end
+
+  it "プライバシーポリシーモーダルを開閉できる" do
+    visit root_path
+
+    find("[data-top-modal-open][aria-controls='top-privacy-modal']").click
+
+    expect(page).to have_selector("#top-privacy-modal", visible: :visible)
+    expect(page).to have_selector("#top-privacy-modal-title", text: "プライバシーポリシー")
+    expect(page).to have_selector(
+      "#top-privacy-modal-description",
+      text: "anonymous_token"
+    )
+    expect(page).to have_selector(
+      "#top-privacy-modal-description",
+      text: "startedAt"
+    )
+    expect(page).to have_selector(
+      "#top-privacy-modal-description",
+      text: "cookie や localStorage を削除すると、履歴や進行中タイマーの状態が失われることがあります。"
+    )
+
+    page.execute_script("document.querySelector('#top-privacy-modal .top-modal__backdrop').click()")
+
+    expect(page).to have_selector("#top-privacy-modal[hidden]", visible: :all)
   end
 end
