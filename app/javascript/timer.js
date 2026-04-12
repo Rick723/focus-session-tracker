@@ -149,6 +149,12 @@ function installTimerTestHooks() {
     },
     setRemaining(value) {
       remaining = value;
+      const fakeStartedAt = new Date(
+        Date.now() - (TOTAL_DURATION_SECONDS - value + 1) * 1000
+      ).toISOString();
+
+      startedAt = fakeStartedAt;
+      localStorage.setItem("startedAt", fakeStartedAt);
     },
     stopTimer() {
       stopTimer();
@@ -368,6 +374,10 @@ function elapsedSecondsFrom(startedAtValue) {
   return Math.floor(elapsedMilliseconds / 1000);
 }
 
+function remainingSecondsFrom(startedAtValue) {
+  return Math.max(TOTAL_DURATION_SECONDS - elapsedSecondsFrom(startedAtValue), 0);
+}
+
 function restoreTimerState() {
   const storedStartedAt = localStorage.getItem("startedAt");
   const storedFocusSessionId = localStorage.getItem("focusSessionId");
@@ -381,8 +391,7 @@ function restoreTimerState() {
     return false;
   }
 
-  const elapsedSeconds = elapsedSecondsFrom(storedStartedAt);
-  remaining = Math.max(TOTAL_DURATION_SECONDS - elapsedSeconds, 0);
+  remaining = remainingSecondsFrom(storedStartedAt);
   renderCreature(resolveStageFromRemaining(remaining));
 
   return true;
@@ -544,7 +553,7 @@ async function finalizeExpiredTimer() {
 
   // MVPでは25分超過時も25分固定で扱う
   if (!currentFocusSessionId) {
-    const created = await createFocusSession(currentStartedAt, TOTAL_DURATION_SECONDS, true);
+    const created = await createFocusSession(currentStartedAt, FIVE_MINUTES_SECONDS, true);
     if (created.status === "failure") {
       lockTimerForReload("保存に失敗しました。再読み込みして復旧をお試しください。");
       return;
@@ -566,14 +575,21 @@ async function finalizeExpiredTimer() {
 }
 
 async function tick() {
-  remaining -= 1;
+  const currentStartedAt = startedAt || localStorage.getItem("startedAt");
+  if (!currentStartedAt) {
+    resetTimer();
+    return;
+  }
+
+  const previousRemaining = remaining;
+  remaining = remainingSecondsFrom(currentStartedAt);
   renderTimer();
 
-  const durationSeconds = TOTAL_DURATION_SECONDS - remaining;
-
-  if (remaining === TOTAL_DURATION_SECONDS - FIVE_MINUTES_SECONDS) {
-    const currentStartedAt = startedAt || localStorage.getItem("startedAt");
-    const created = await createFocusSession(currentStartedAt, durationSeconds);
+  if (
+    previousRemaining > TOTAL_DURATION_SECONDS - FIVE_MINUTES_SECONDS &&
+    remaining <= TOTAL_DURATION_SECONDS - FIVE_MINUTES_SECONDS
+  ) {
+    const created = await createFocusSession(currentStartedAt, FIVE_MINUTES_SECONDS);
     if (created.status === "failure") {
       lockTimerForReload("保存に失敗しました。再読み込みして復旧をお試しください。");
       return;
@@ -619,8 +635,24 @@ async function handleStop() {
 
   stopTimer();
 
+  const currentStartedAt = startedAt || localStorage.getItem("startedAt");
+  if (currentStartedAt) {
+    remaining = remainingSecondsFrom(currentStartedAt);
+    renderTimer();
+  }
+
   const durationSeconds = TOTAL_DURATION_SECONDS - remaining;
-  const currentFocusSessionId = focusSessionId || localStorage.getItem("focusSessionId");
+  let currentFocusSessionId = focusSessionId || localStorage.getItem("focusSessionId");
+
+  if (!currentFocusSessionId && currentStartedAt && durationSeconds >= FIVE_MINUTES_SECONDS) {
+    const created = await createFocusSession(currentStartedAt, FIVE_MINUTES_SECONDS);
+    if (created.status === "failure") {
+      lockTimerForReload("保存に失敗しました。再読み込みして復旧をお試しください。");
+      return;
+    }
+
+    currentFocusSessionId = focusSessionId || localStorage.getItem("focusSessionId");
+  }
 
   if (!currentFocusSessionId) {
     resetTimer();
@@ -674,7 +706,7 @@ async function initializeTimer() {
     const durationSeconds = TOTAL_DURATION_SECONDS - remaining;
 
     if (durationSeconds >= FIVE_MINUTES_SECONDS) {
-      const created = await createFocusSession(startedAt, durationSeconds);
+      const created = await createFocusSession(startedAt, FIVE_MINUTES_SECONDS);
 
       if (created.status === "failure") {
         lockTimerForReload("保存に失敗しました。再読み込みして復旧をお試しください。");
