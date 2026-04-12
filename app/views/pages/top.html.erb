@@ -1,12 +1,159 @@
-<div class="top-page">
-  <div class="top-card">
-    <p class="top-eyebrow">Pomodoro Timer</p>
-    <h1>TOP</h1>
-    <p>短期集中！ポモちゃんドロちゃん育成タイマー</p>
+<%# Hero artwork desktop: app/assets/images/timer_images/farm_layout/first_phase_16:9.png %>
+<%# Hero artwork mobile: app/assets/images/timer_images/farm_layout/first_phase_3:4.png %>
+<% provide(:page_title, "はじめの５分集中タイマー | TOP") %>
+<% x_message = "これから5分、集中をはじめます。 #はじめの５分集中タイマー" %>
 
-    <div class="top-links">
-      <%= link_to "タイマーを開く", timer_path, class: "top-link-button" %>
-      <%= link_to "カレンダーを見る", calendar_path, class: "top-link-button top-link-button-secondary" %>
+<div
+  class="top-page top-hero"
+  data-top-page
+  style="
+    --top-hero-desktop-image: url('<%= asset_path('timer_images/farm_layout/first_phase_16:9.png') %>');
+    --top-hero-mobile-image: url('<%= asset_path('timer_images/farm_layout/first_phase_3:4.png') %>');
+  "
+>
+  <div class="top-hero__mascots" aria-hidden="true">
+    <img
+      class="top-hero__mascot top-hero__mascot--left"
+      src="<%= asset_path('creature_images/normal_creature/doro-chan0 Image.png') %>"
+      alt=""
+    >
+    <img
+      class="top-hero__mascot top-hero__mascot--right"
+      src="<%= asset_path('creature_images/normal_creature/pomo-chan Image.png') %>"
+      alt=""
+    >
+  </div>
+
+  <section class="top-hero__content" aria-labelledby="top-title">
+    <div class="top-hero__copy">
+      <div class="top-hero__heading-group">
+        <h1 id="top-title" class="top-hero__title">
+          はじめの５分集中タイマー
+          <span class="top-hero__subtitle">〜 ポモちゃんドロちゃん育成記録 〜</span>
+        </h1>
+        <p class="top-hero__concept">
+          5分の集中を積み重ねて、ポモちゃんとドロちゃんの記録を育てていくアプリです。
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="top-info-button"
+        data-top-modal-open
+        aria-haspopup="dialog"
+        aria-controls="top-info-modal"
+      >
+        <span class="top-info-button__icon" aria-hidden="true">i</span>
+        <span class="top-info-button__text">アプリについて</span>
+      </button>
+
+      <div class="top-hero__actions">
+        <%= link_to "集中を始める", timer_path, class: "top-link-button top-link-button-primary" %>
+        <%= link_to "記録を見る", calendar_path, class: "top-link-button top-link-button-secondary" %>
+        <%= link_to "Xで宣言する",
+          "https://twitter.com/intent/tweet?text=#{ERB::Util.url_encode(x_message)}",
+          class: "top-link-button top-link-button-tertiary",
+          target: "_blank",
+          rel: "noopener noreferrer" %>
+      </div>
+
+      <div class="top-hero__utility">
+        <button
+          type="button"
+          class="top-hero__utility-link"
+          data-top-modal-open
+          aria-haspopup="dialog"
+          aria-controls="top-privacy-modal"
+        >
+          プライバシーポリシー
+        </button>
+      </div>
     </div>
+  </section>
+
+  <div id="top-info-modal" class="top-modal" data-top-modal hidden>
+    <div class="top-modal__backdrop" data-top-modal-close></div>
+    <section
+      class="top-modal__panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="top-modal-title"
+      aria-describedby="top-modal-description"
+    >
+      <div class="top-modal__header">
+        <h2 id="top-modal-title" class="top-modal__title">アプリについて</h2>
+        <button type="button" class="top-modal__close" data-top-modal-close aria-label="閉じる">
+          閉じる
+        </button>
+      </div>
+
+      <div id="top-modal-description" class="top-modal__body">
+        <p>
+          ・集中を始めるきっかけは、まず5分でじゅうぶん。気持ちが動いた最初の時間を大切にするためのタイマーです。
+        </p>
+        <p>
+          ・5分以上の集中は記録として残り、タイマー画面からすぐに集中を始められます。あとからカレンダー画面で、積み重ねた時間をゆっくり振り返れます。
+        </p>
+        <p>
+          ・Xで、これから始めるタスクを宣言できます。
+        </p>
+      </div>
+    </section>
+  </div>
+
+  <div id="top-privacy-modal" class="top-modal" data-top-modal hidden>
+    <div class="top-modal__backdrop" data-top-modal-close></div>
+    <section
+      class="top-modal__panel top-modal__panel--wide"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="top-privacy-modal-title"
+      aria-describedby="top-privacy-modal-description"
+    >
+      <div class="top-modal__header">
+        <h2 id="top-privacy-modal-title" class="top-modal__title">プライバシーポリシー</h2>
+        <button type="button" class="top-modal__close" data-top-modal-close aria-label="閉じる">
+          閉じる
+        </button>
+      </div>
+
+      <div id="top-privacy-modal-description" class="top-modal__body top-modal__body--policy">
+        <section class="top-modal__section">
+          <h3 class="top-modal__section-title">匿名ユーザー方式について</h3>
+          <p>
+            このアプリはログイン機能を持たず、匿名ユーザー方式で動作しています。同じブラウザで使い続けられるように、
+            利用者を見分けるための最小限の情報を保存しています。
+          </p>
+        </section>
+
+        <section class="top-modal__section">
+          <h3 class="top-modal__section-title">取得・保存する情報</h3>
+          <p>
+            cookie には <code>anonymous_token</code> を保存しています。これは、同じブラウザの利用者を識別するための値です。
+          </p>
+          <p>
+            <code>localStorage</code> には <code>startedAt</code>、<code>focusSessionId</code>、<code>postedStartedAt</code>
+            、<code>completionNotificationEnabled</code> を保存しています。これらは、進行中タイマーの復元や、
+            5分到達時の重複POST防止、PC完了通知の設定保持に使っています。
+          </p>
+        </section>
+
+        <section class="top-modal__section">
+          <h3 class="top-modal__section-title">利用目的</h3>
+          <p>
+            保存している情報は、アプリの基本動作を実現するためだけに利用しています。匿名のまま集中記録を残し、
+            タイマー画面を再表示したときも途中状態をできるだけ自然に復元できるようにするためです。
+          </p>
+        </section>
+
+        <section class="top-modal__section">
+          <h3 class="top-modal__section-title">ご注意</h3>
+          <p>
+            cookie や <code>localStorage</code> を削除すると、履歴や進行中タイマーの状態が失われることがあります。
+            また、ブラウザや端末をまたいで履歴を共有することはできません。
+          </p>
+        </section>
+      </div>
+    </section>
   </div>
 </div>
