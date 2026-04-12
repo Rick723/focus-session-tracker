@@ -296,6 +296,7 @@ a {
   display: grid;
   place-items: center;
   padding: 24px;
+  overflow-y: auto;
 }
 
 .top-modal__backdrop {
@@ -308,15 +309,19 @@ a {
 .top-modal__panel {
   position: relative;
   width: min(520px, 100%);
+  max-height: min(82vh, 760px);
   padding: 26px 26px 22px;
   border-radius: 28px;
   border: 1px solid rgba(219, 206, 182, 0.95);
   background: rgba(255, 251, 243, 0.98);
   box-shadow: 0 24px 58px rgba(78, 54, 28, 0.18);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .top-modal__panel--wide {
   width: min(640px, 100%);
+  max-height: min(84vh, 820px);
 }
 
 .top-modal__header {
@@ -325,6 +330,11 @@ a {
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding-bottom: 8px;
+  background: rgba(255, 251, 243, 0.98);
 }
 
 .top-modal__title {
@@ -490,6 +500,7 @@ a {
   }
 
   .top-modal__panel {
+    max-height: calc(100vh - 32px);
     padding: 22px 18px 18px;
   }
 

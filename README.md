@@ -203,6 +203,7 @@ docker compose exec -e RAILS_ENV=test web bin/rails db:prepare
 - タイマー状態の復元は `localStorage` に依存します
 - 複数タブの同時操作では、最終防衛はサーバー側の重複防止と conflict 応答に依存します
 - PC 通知はブラウザ権限と OS 側の通知設定に依存します
+- Windows の応答不可や集中モードが有効なときは、`Notification` の生成に成功してもバナー通知が表示されないことがあります
 
 ## 開発上の運用ルール
 
