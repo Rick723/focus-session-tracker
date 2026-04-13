@@ -20,14 +20,20 @@ RSpec.describe "モバイル縦画面レイアウト", type: :system, js: true d
         const utilityLink = document.querySelector(".top-hero__utility-link");
         const mobileInfoButton = document.querySelector(".top-info-button--mobile");
         const desktopInfoButton = document.querySelector(".top-info-button--desktop");
+        const heroCopy = document.querySelector(".top-hero__copy");
+        const copyRect = heroCopy.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
 
         return {
           viewportHeight,
+          viewportWidth,
           primaryLinkBottom: primaryLink.getBoundingClientRect().bottom,
           utilityLinkBottom: utilityLink.getBoundingClientRect().bottom,
           heroOverflowY: getComputedStyle(hero).overflowY,
           mobileInfoDisplay: getComputedStyle(mobileInfoButton).display,
-          desktopInfoDisplay: getComputedStyle(desktopInfoButton).display
+          desktopInfoDisplay: getComputedStyle(desktopInfoButton).display,
+          copyLeftGap: copyRect.left,
+          copyRightGap: viewportWidth - copyRect.right
         };
       })()
     JS
@@ -35,6 +41,7 @@ RSpec.describe "モバイル縦画面レイアウト", type: :system, js: true d
     expect(metrics["heroOverflowY"]).not_to eq("hidden")
     expect(metrics["mobileInfoDisplay"]).not_to eq("none")
     expect(metrics["desktopInfoDisplay"]).to eq("none")
+    expect((metrics["copyLeftGap"] - metrics["copyRightGap"]).abs).to be <= 12
     expect(metrics["primaryLinkBottom"]).to be <= metrics["viewportHeight"]
     expect(metrics["utilityLinkBottom"]).to be <= metrics["viewportHeight"] + 1
   end
