@@ -5,6 +5,10 @@ RSpec.describe "モバイル縦画面レイアウト", type: :system, js: true d
     driven_by(:selenium, using: :headless_chrome, screen_size: [393, 720])
   end
 
+  after do
+    page.current_window.resize_to(1400, 1400)
+  end
+
   it "トップ画面の主要導線が初期表示で見切れない" do
     page.current_window.resize_to(393, 640)
 
