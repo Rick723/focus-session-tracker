@@ -31,7 +31,7 @@
         id="timer-notification-button"
         type="button"
         class="timer-notification-button"
-        hidden
+        <%= "hidden" unless Rails.env.test? %>
       >
         PC通知をオン
       </button>

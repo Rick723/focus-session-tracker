@@ -1,8 +1,12 @@
 <%# Hero artwork desktop: app/assets/images/timer_images/farm_layout/first_phase_16:9.png %>
 <%# Hero artwork mobile: app/assets/images/timer_images/farm_layout/first_phase_3:4.png %>
 <% provide(:page_title, "はじめの５分集中タイマー | TOP") %>
-<% x_message = "これから5分、集中をはじめます。 #はじめの５分集中タイマー" %>
+<% x_message = "【やること】
 
+まずは5分、集中をはじめます。
+ https://focus-session-tracker-production.up.railway.app
+#はじめの５分集中タイマー" %>
+ 
 <div
   class="top-page top-hero"
   data-top-page
@@ -11,7 +15,7 @@
     --top-hero-mobile-image: url('<%= asset_path('timer_images/farm_layout/first_phase_3:4.png') %>');
   "
 >
-  <div class="top-hero__mascots" aria-hidden="true">
+  <div class="top-hero__mascots top-hero__mascots--desktop" aria-hidden="true">
     <img
       class="top-hero__mascot top-hero__mascot--left"
       src="<%= asset_path('creature_images/normal_creature/doro-chan0 Image.png') %>"
@@ -25,6 +29,34 @@
   </div>
 
   <section class="top-hero__content" aria-labelledby="top-title">
+    <div class="top-hero__mobile-ornament">
+      <div class="top-hero__mascots top-hero__mascots--mobile" aria-hidden="true">
+        <img
+          class="top-hero__mascot top-hero__mascot--left"
+          src="<%= asset_path('creature_images/normal_creature/doro-chan0 Image.png') %>"
+          alt=""
+        >
+        <img
+          class="top-hero__mascot top-hero__mascot--right"
+          src="<%= asset_path('creature_images/normal_creature/pomo-chan Image.png') %>"
+          alt=""
+        >
+      </div>
+
+      <div class="top-hero__mobile-info">
+        <button
+          type="button"
+          class="top-info-button top-info-button--mobile"
+          data-top-modal-open
+          aria-haspopup="dialog"
+          aria-controls="top-info-modal"
+        >
+          <span class="top-info-button__icon" aria-hidden="true">i</span>
+          <span class="top-info-button__text">アプリについて</span>
+        </button>
+      </div>
+    </div>
+
     <div class="top-hero__copy">
       <div class="top-hero__heading-group">
         <h1 id="top-title" class="top-hero__title">
@@ -32,13 +64,15 @@
           <span class="top-hero__subtitle">〜 ポモちゃんドロちゃん育成記録 〜</span>
         </h1>
         <p class="top-hero__concept">
-          5分の集中を積み重ねて、ポモちゃんとドロちゃんの記録を育てていくアプリです。
+          5分の集中を積み重ねて、ポモちゃんとドロちゃんの
+          <br>
+          記録を育てていくアプリです。
         </p>
       </div>
 
       <button
         type="button"
-        class="top-info-button"
+        class="top-info-button top-info-button--desktop"
         data-top-modal-open
         aria-haspopup="dialog"
         aria-controls="top-info-modal"
