@@ -6,6 +6,8 @@ RSpec.describe "モバイル縦画面レイアウト", type: :system, js: true d
   end
 
   it "トップ画面の主要導線が初期表示で見切れない" do
+    page.current_window.resize_to(393, 640)
+
     visit root_path
 
     expect(page).to have_link("集中を始める", href: timer_path)
@@ -15,10 +17,12 @@ RSpec.describe "モバイル縦画面レイアウト", type: :system, js: true d
         const viewportHeight = window.innerHeight;
         const hero = document.querySelector(".top-hero");
         const primaryLink = document.querySelector(".top-link-button-primary");
+        const utilityLink = document.querySelector(".top-hero__utility-link");
 
         return {
           viewportHeight,
           primaryLinkBottom: primaryLink.getBoundingClientRect().bottom,
+          utilityLinkBottom: utilityLink.getBoundingClientRect().bottom,
           heroOverflowY: getComputedStyle(hero).overflowY
         };
       })()
@@ -26,9 +30,12 @@ RSpec.describe "モバイル縦画面レイアウト", type: :system, js: true d
 
     expect(metrics["heroOverflowY"]).not_to eq("hidden")
     expect(metrics["primaryLinkBottom"]).to be <= metrics["viewportHeight"]
+    expect(metrics["utilityLinkBottom"]).to be <= metrics["viewportHeight"] + 1
   end
 
   it "タイマー画面の主要操作が初期表示で見切れない" do
+    page.current_window.resize_to(393, 720)
+
     visit timer_path
 
     expect(page).to have_selector("#start-button", visible: :visible)
