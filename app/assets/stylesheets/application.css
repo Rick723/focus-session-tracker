@@ -474,7 +474,7 @@ a {
 
   .top-hero__content {
     width: min(332px, 100%);
-    gap: 10px;
+    gap: 6px;
     justify-items: center;
     margin-inline: auto;
   }
@@ -484,10 +484,11 @@ a {
   }
 
   .top-hero__mobile-ornament {
-    width: min(228px, 100%);
+    width: min(320px, 100%);
     display: grid;
     justify-items: center;
-    gap: 6px;
+    gap: 0;
+    margin-top: -4px;
     margin-inline: auto;
   }
 
@@ -495,20 +496,22 @@ a {
     width: 100%;
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    padding: 0 8px;
+    align-items: flex-end;
+    padding: 0 22px;
     box-sizing: border-box;
   }
 
   .top-hero__mascots--mobile .top-hero__mascot {
     position: static;
-    width: min(84px, 21vw);
+    width: min(120px, 30vw);
     transform: none;
   }
 
   .top-hero__mobile-info {
     display: flex;
     justify-content: center;
+    width: 100%;
+    margin-bottom: 2px;
   }
 
   .top-hero__title {
@@ -535,7 +538,7 @@ a {
   }
 
   .top-hero__utility {
-    margin-top: 10px;
+    margin-top: 8px;
   }
 
   .top-link-button {
@@ -603,7 +606,7 @@ a {
 
   .top-hero__content {
     width: min(308px, 100%);
-    gap: 6px;
+    gap: 4px;
     justify-items: center;
     margin-inline: auto;
   }
@@ -625,13 +628,18 @@ a {
   }
 
   .top-hero__mobile-ornament {
-    width: min(208px, 100%);
-    gap: 4px;
+    width: min(296px, 100%);
+    gap: 0;
+    margin-top: -6px;
     margin-inline: auto;
   }
 
   .top-hero__mascots--mobile .top-hero__mascot {
-    width: min(72px, 18vw);
+    width: min(104px, 26vw);
+  }
+
+  .top-hero__mascots--mobile {
+    padding: 0 18px;
   }
 
   .top-info-button--mobile {

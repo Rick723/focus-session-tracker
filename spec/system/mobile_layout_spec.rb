@@ -25,7 +25,10 @@ RSpec.describe "モバイル縦画面レイアウト", type: :system, js: true d
         const mobileInfoButton = document.querySelector(".top-info-button--mobile");
         const desktopInfoButton = document.querySelector(".top-info-button--desktop");
         const heroCopy = document.querySelector(".top-hero__copy");
+        const mobileOrnament = document.querySelector(".top-hero__mobile-ornament");
+        const mobileInfoRect = mobileInfoButton.getBoundingClientRect();
         const copyRect = heroCopy.getBoundingClientRect();
+        const ornamentRect = mobileOrnament.getBoundingClientRect();
         const viewportWidth = window.innerWidth;
 
         return {
@@ -37,7 +40,11 @@ RSpec.describe "モバイル縦画面レイアウト", type: :system, js: true d
           mobileInfoDisplay: getComputedStyle(mobileInfoButton).display,
           desktopInfoDisplay: getComputedStyle(desktopInfoButton).display,
           copyLeftGap: copyRect.left,
-          copyRightGap: viewportWidth - copyRect.right
+          copyRightGap: viewportWidth - copyRect.right,
+          mobileInfoBottom: mobileInfoRect.bottom,
+          copyTop: copyRect.top,
+          ornamentTop: ornamentRect.top,
+          copyBottom: copyRect.bottom
         };
       })()
     JS
@@ -46,6 +53,8 @@ RSpec.describe "モバイル縦画面レイアウト", type: :system, js: true d
     expect(metrics["mobileInfoDisplay"]).not_to eq("none")
     expect(metrics["desktopInfoDisplay"]).to eq("none")
     expect((metrics["copyLeftGap"] - metrics["copyRightGap"]).abs).to be <= 12
+    expect(metrics["mobileInfoBottom"]).to be <= metrics["copyTop"]
+    expect(metrics["ornamentTop"]).to be >= metrics["copyBottom"] - 8
     expect(metrics["primaryLinkBottom"]).to be <= metrics["viewportHeight"]
     expect(metrics["utilityLinkBottom"]).to be <= metrics["viewportHeight"] + 1
   end
