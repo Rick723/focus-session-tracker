@@ -14,6 +14,13 @@
  *= require_self
  */
 
+:root {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+}
+
 body {
   margin: 0;
   background:
@@ -30,6 +37,8 @@ a {
 .top-page,
 .calendar-page {
   min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
   box-sizing: border-box;
 }
 
@@ -80,7 +89,8 @@ a {
   align-items: center;
   justify-content: center;
   padding: clamp(28px, 4vw, 56px);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: visible;
   isolation: isolate;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 248, 236, 0.1) 40%, rgba(88, 58, 31, 0.14) 100%),
@@ -310,6 +320,8 @@ a {
   position: relative;
   width: min(520px, 100%);
   max-height: min(82vh, 760px);
+  max-height: min(82svh, 760px);
+  max-height: min(82dvh, 760px);
   padding: 26px 26px 22px;
   border-radius: 28px;
   border: 1px solid rgba(219, 206, 182, 0.95);
@@ -322,6 +334,8 @@ a {
 .top-modal__panel--wide {
   width: min(640px, 100%);
   max-height: min(84vh, 820px);
+  max-height: min(84svh, 820px);
+  max-height: min(84dvh, 820px);
 }
 
 .top-modal__header {
@@ -431,7 +445,12 @@ a {
 @media (max-width: 720px) {
   .top-hero {
     --top-hero-image: var(--top-hero-mobile-image);
-    padding: 16px 14px 22px;
+    justify-content: flex-start;
+    padding:
+      calc(16px + var(--safe-area-top))
+      calc(14px + var(--safe-area-right))
+      calc(22px + var(--safe-area-bottom))
+      calc(14px + var(--safe-area-left));
     background-position: center top;
   }
 
@@ -501,6 +520,8 @@ a {
 
   .top-modal__panel {
     max-height: calc(100vh - 32px);
+    max-height: calc(100svh - 32px);
+    max-height: calc(100dvh - 32px);
     padding: 22px 18px 18px;
   }
 
@@ -723,6 +744,8 @@ a {
   z-index: 1;
   width: min(560px, calc(100vw - 32px));
   max-height: calc(100vh - 48px);
+  max-height: calc(100svh - 48px);
+  max-height: calc(100dvh - 48px);
   margin: 24px auto;
   padding: 20px;
   overflow-y: auto;
@@ -818,12 +841,14 @@ a {
   --timer-footer-room: 134px;
   min-height: 100vh;
   min-height: 100svh;
-  height: 100vh;
-  height: 100svh;
+  min-height: 100dvh;
+  height: auto;
   position: relative;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   isolation: isolate;
   color: #4e2c15;
   font-family: "Hiragino Maru Gothic ProN", "YuKyokasho", "Hiragino Sans", sans-serif;
@@ -1029,6 +1054,8 @@ a {
   position: relative;
   width: clamp(980px, 76vw, 1320px);
   max-height: min(82vh, 1280px);
+  max-height: min(82svh, 1280px);
+  max-height: min(82dvh, 1280px);
   aspect-ratio: 1024 / 1536;
 }
 
@@ -1406,6 +1433,8 @@ a {
   .tomato-timer {
     width: min(760px, 88vw);
     max-height: min(80vh, 1120px);
+    max-height: min(80svh, 1120px);
+    max-height: min(80dvh, 1120px);
   }
 
   .tomato-timer__display {
@@ -1481,6 +1510,8 @@ a {
   .tomato-timer {
     width: min(420px, 64vw);
     max-height: min(62vh, 640px);
+    max-height: min(62svh, 640px);
+    max-height: min(62dvh, 640px);
   }
 
   .tomato-timer__display {
@@ -1556,6 +1587,8 @@ a {
   .tomato-timer {
     width: clamp(420px, 38vh, 560px);
     max-height: min(66vh, 840px);
+    max-height: min(66svh, 840px);
+    max-height: min(66dvh, 840px);
   }
 
   .tomato-timer__display {
@@ -1638,6 +1671,8 @@ a {
   .tomato-timer {
     width: clamp(360px, 36vh, 470px);
     max-height: min(64vh, 700px);
+    max-height: min(64svh, 700px);
+    max-height: min(64dvh, 700px);
   }
 
   .tomato-timer__display {
@@ -1696,6 +1731,10 @@ a {
     gap: 14px;
   }
 
+  .timer-page__header {
+    padding-top: calc(16px + var(--safe-area-top));
+  }
+
   .timer-notification-button {
     display: none !important;
   }
@@ -1717,8 +1756,9 @@ a {
   }
 
   .timer-scene {
+    justify-content: flex-start;
     gap: 8px;
-    padding: 0 14px 12px;
+    padding: 0 14px calc(12px + var(--safe-area-bottom));
   }
 
   .timer-hero {
@@ -1737,6 +1777,8 @@ a {
   .tomato-timer {
     width: min(390px, 80vw);
     max-height: min(62vh, 700px);
+    max-height: min(62svh, 700px);
+    max-height: min(62dvh, 700px);
   }
 
   .tomato-timer__display {
@@ -1758,27 +1800,37 @@ a {
 
 @media (max-width: 540px) {
   .timer-page {
-    --timer-header-height: 134px;
-    --timer-footer-room: 132px;
+    --timer-header-height: 122px;
+    --timer-footer-room: 126px;
   }
 
   .timer-page__header {
-    padding-top: 14px;
+    padding-top: calc(10px + var(--safe-area-top));
   }
 
   .timer-page__nav {
     flex-wrap: wrap;
     justify-content: center;
+    gap: 10px;
   }
 
   .wood-sign--header {
-    width: min(260px, 100%);
+    width: min(228px, 100%);
     flex: 0 1 auto;
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+
+  .wood-sign--header::before,
+  .wood-sign--header::after {
+    top: -24px;
+    height: 26px;
   }
 
   .timer-scene {
-    min-height: calc(100vh - 14px);
-    padding: 0 10px 10px;
+    min-height: auto;
+    justify-content: flex-start;
+    padding: 0 10px calc(12px + var(--safe-area-bottom));
   }
 
   .timer-stage {
@@ -1787,68 +1839,70 @@ a {
   }
 
   .timer-creature {
-    width: min(138px, 42vw);
-    margin-bottom: -28px;
+    width: min(122px, 34vw);
+    margin-bottom: -24px;
   }
 
   .tomato-timer {
-    width: min(330px, 82vw);
-    max-height: min(58vh, 560px);
+    width: min(300px, 74vw);
+    max-height: none;
   }
 
   .tomato-timer__display {
     top: 48%;
-    width: min(54%, 196px);
+    width: min(54%, 182px);
   }
 
   .tomato-timer__time {
-    font-size: clamp(32px, 8.6vw, 48px);
+    font-size: clamp(30px, 8.2vw, 44px);
   }
 
   .timer-actions {
-    min-height: 56px;
+    min-height: 52px;
   }
 
   .wood-sign--button {
-    min-height: 58px;
-    font-size: 24px;
+    min-height: 52px;
+    font-size: 22px;
   }
 
   .timer-status-board {
+    width: min(360px, 100%);
     min-height: 44px;
     padding: 8px 14px;
-    font-size: 15px;
+    font-size: 14px;
   }
 }
 
 @media (max-width: 720px) and (orientation: portrait) and (max-height: 980px) {
   .timer-page {
-    --timer-header-height: 118px;
-    --timer-footer-room: 118px;
+    --timer-header-height: 108px;
+    --timer-footer-room: 108px;
   }
 
   .timer-page__header {
-    padding: 12px 14px 0;
+    padding: calc(8px + var(--safe-area-top)) 12px 0;
   }
 
   .timer-page__nav {
-    gap: 10px;
+    gap: 8px;
   }
 
   .wood-sign--header {
-    font-size: 15px;
-    padding: 10px 16px;
+    font-size: 14px;
+    padding: 9px 14px;
   }
 
   .wood-sign--header::before,
   .wood-sign--header::after {
-    top: -28px;
-    height: 30px;
+    top: -24px;
+    height: 26px;
   }
 
   .timer-scene {
-    gap: 6px;
-    padding: 0 10px 8px;
+    justify-content: flex-start;
+    gap: 4px;
+    padding: 0 10px calc(8px + var(--safe-area-bottom));
   }
 
   .timer-stage {
@@ -1856,13 +1910,13 @@ a {
   }
 
   .timer-stage::before {
-    inset: 48px 4% 40px;
+    inset: 40px 4% 34px;
   }
 
   .timer-creature {
-    width: min(112px, 26vw);
-    gap: 6px;
-    margin-bottom: -24px;
+    width: min(104px, 24vw);
+    gap: 4px;
+    margin-bottom: -20px;
   }
 
   .timer-creature__label {
@@ -1871,13 +1925,15 @@ a {
   }
 
   .tomato-timer {
-    width: min(292px, 72vw);
-    max-height: min(52vh, 480px);
+    width: min(276px, 68vw);
+    max-height: min(48vh, 440px);
+    max-height: min(48svh, 440px);
+    max-height: min(48dvh, 440px);
   }
 
   .tomato-timer__display {
-    top: 47.8%;
-    width: min(52%, 156px);
+    top: 47.9%;
+    width: min(52%, 148px);
     gap: 2px;
   }
 
@@ -1888,30 +1944,30 @@ a {
   }
 
   .tomato-timer__time {
-    font-size: clamp(28px, 7.8vw, 40px);
+    font-size: clamp(26px, 7.2vw, 38px);
   }
 
   .tomato-timer__phase {
-    min-height: 24px;
-    padding: 2px 10px;
-    font-size: 11px;
+    min-height: 22px;
+    padding: 2px 9px;
+    font-size: 10px;
   }
 
   .timer-actions {
-    min-height: 46px;
-    gap: 8px;
+    min-height: 42px;
+    gap: 6px;
   }
 
   .wood-sign--button {
-    width: min(252px, 100%);
-    min-height: 46px;
-    font-size: 20px;
+    width: min(236px, 100%);
+    min-height: 42px;
+    font-size: 18px;
   }
 
   .timer-status-board {
-    width: min(420px, 100%);
-    min-height: 40px;
-    padding: 7px 12px;
-    font-size: 13px;
+    width: min(360px, 100%);
+    min-height: 38px;
+    padding: 6px 10px;
+    font-size: 12px;
   }
 }
