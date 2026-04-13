@@ -18,17 +18,23 @@ RSpec.describe "モバイル縦画面レイアウト", type: :system, js: true d
         const hero = document.querySelector(".top-hero");
         const primaryLink = document.querySelector(".top-link-button-primary");
         const utilityLink = document.querySelector(".top-hero__utility-link");
+        const mobileInfoButton = document.querySelector(".top-info-button--mobile");
+        const desktopInfoButton = document.querySelector(".top-info-button--desktop");
 
         return {
           viewportHeight,
           primaryLinkBottom: primaryLink.getBoundingClientRect().bottom,
           utilityLinkBottom: utilityLink.getBoundingClientRect().bottom,
-          heroOverflowY: getComputedStyle(hero).overflowY
+          heroOverflowY: getComputedStyle(hero).overflowY,
+          mobileInfoDisplay: getComputedStyle(mobileInfoButton).display,
+          desktopInfoDisplay: getComputedStyle(desktopInfoButton).display
         };
       })()
     JS
 
     expect(metrics["heroOverflowY"]).not_to eq("hidden")
+    expect(metrics["mobileInfoDisplay"]).not_to eq("none")
+    expect(metrics["desktopInfoDisplay"]).to eq("none")
     expect(metrics["primaryLinkBottom"]).to be <= metrics["viewportHeight"]
     expect(metrics["utilityLinkBottom"]).to be <= metrics["viewportHeight"] + 1
   end

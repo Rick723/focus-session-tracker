@@ -15,7 +15,7 @@
     --top-hero-mobile-image: url('<%= asset_path('timer_images/farm_layout/first_phase_3:4.png') %>');
   "
 >
-  <div class="top-hero__mascots" aria-hidden="true">
+  <div class="top-hero__mascots top-hero__mascots--desktop" aria-hidden="true">
     <img
       class="top-hero__mascot top-hero__mascot--left"
       src="<%= asset_path('creature_images/normal_creature/doro-chan0 Image.png') %>"
@@ -29,6 +29,34 @@
   </div>
 
   <section class="top-hero__content" aria-labelledby="top-title">
+    <div class="top-hero__mobile-ornament">
+      <div class="top-hero__mascots top-hero__mascots--mobile" aria-hidden="true">
+        <img
+          class="top-hero__mascot top-hero__mascot--left"
+          src="<%= asset_path('creature_images/normal_creature/doro-chan0 Image.png') %>"
+          alt=""
+        >
+        <img
+          class="top-hero__mascot top-hero__mascot--right"
+          src="<%= asset_path('creature_images/normal_creature/pomo-chan Image.png') %>"
+          alt=""
+        >
+      </div>
+
+      <div class="top-hero__mobile-info">
+        <button
+          type="button"
+          class="top-info-button top-info-button--mobile"
+          data-top-modal-open
+          aria-haspopup="dialog"
+          aria-controls="top-info-modal"
+        >
+          <span class="top-info-button__icon" aria-hidden="true">i</span>
+          <span class="top-info-button__text">アプリについて</span>
+        </button>
+      </div>
+    </div>
+
     <div class="top-hero__copy">
       <div class="top-hero__heading-group">
         <h1 id="top-title" class="top-hero__title">
@@ -42,7 +70,7 @@
 
       <button
         type="button"
-        class="top-info-button"
+        class="top-info-button top-info-button--desktop"
         data-top-modal-open
         aria-haspopup="dialog"
         aria-controls="top-info-modal"
